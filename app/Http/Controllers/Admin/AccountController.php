@@ -20,13 +20,16 @@ class AccountController extends Controller
         $search = $request->string('search')->trim()->value();
         $status = $request->string('status')->trim()->value();
         $gameId = $request->integer('game_id');
+        $sort = in_array($request->string('sort')->trim()->value(), ['price_asc', 'price_desc'], true)
+            ? $request->string('sort')->trim()->value()
+            : null;
 
         $accounts = Account::query()
             ->with('game:id,name,slug')
             ->search($search)
             ->when(in_array($status, AccountStatus::values(), true), fn ($query) => $query->where('status', $status))
             ->when($gameId, fn ($query) => $query->where('game_id', $gameId))
-            ->latest()
+            ->sorted($sort)
             ->paginate(10)
             ->withQueryString();
 
@@ -36,6 +39,7 @@ class AccountController extends Controller
             'search' => $search,
             'status' => $status,
             'gameId' => $gameId,
+            'sort' => $sort,
         ]);
     }
 

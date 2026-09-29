@@ -1,25 +1,26 @@
 const drawerPanel = document.querySelector('[data-drawer-panel]');
 const drawerOverlay = document.querySelector('[data-drawer-overlay]');
-const drawerToggle = document.querySelector('[data-drawer-toggle]');
+const drawerToggles = document.querySelectorAll('[data-drawer-toggle]');
 
-if (drawerPanel && drawerToggle) {
-    const isOpen = () => ! drawerPanel.classList.contains('-translate-x-full');
+if (drawerPanel && drawerToggles.length) {
+    const closedClass = drawerPanel.dataset.drawerClosedClass ?? '-translate-x-full';
+    const isOpen = () => ! drawerPanel.classList.contains(closedClass);
 
     const close = () => {
-        drawerPanel.classList.add('-translate-x-full');
+        drawerPanel.classList.add(closedClass);
         drawerOverlay.classList.add('opacity-0', 'pointer-events-none');
-        drawerToggle.setAttribute('aria-expanded', 'false');
+        drawerToggles.forEach((toggle) => toggle.setAttribute('aria-expanded', 'false'));
         document.body.classList.remove('overflow-hidden');
     };
 
     const open = () => {
-        drawerPanel.classList.remove('-translate-x-full');
+        drawerPanel.classList.remove(closedClass);
         drawerOverlay.classList.remove('opacity-0', 'pointer-events-none');
-        drawerToggle.setAttribute('aria-expanded', 'true');
+        drawerToggles.forEach((toggle) => toggle.setAttribute('aria-expanded', 'true'));
         document.body.classList.add('overflow-hidden');
     };
 
-    drawerToggle.addEventListener('click', () => (isOpen() ? close() : open()));
+    drawerToggles.forEach((toggle) => toggle.addEventListener('click', () => (isOpen() ? close() : open())));
     drawerOverlay.addEventListener('click', close);
     drawerPanel.querySelectorAll('a').forEach((link) => link.addEventListener('click', close));
 

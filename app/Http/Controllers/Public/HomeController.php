@@ -12,6 +12,12 @@ class HomeController extends Controller
     public function index(): View
     {
         return view('public.home', [
+            'stats' => [
+                'games' => Game::query()->active()->count(),
+                'accounts' => Account::query()->count(),
+                'available' => Account::query()->available()->count(),
+                'sold' => Account::query()->sold()->count(),
+            ],
             'games' => Game::query()
                 ->active()
                 ->withStockCounts()

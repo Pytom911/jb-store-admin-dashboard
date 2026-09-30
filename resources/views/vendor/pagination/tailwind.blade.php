@@ -1,6 +1,6 @@
 @if ($paginator->hasPages())
     @php
-        $linkClasses = 'inline-flex h-9 min-w-9 items-center justify-center rounded-lg px-2.5 text-sm font-medium transition focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500';
+        $linkClasses = 'inline-flex h-9 min-w-9 items-center justify-center rounded-lg px-2.5 text-sm font-medium transition focus:outline-none focus-visible:ring-2 focus-visible:ring-slate-500';
     @endphp
 
     <nav role="navigation" aria-label="Navigasi halaman" class="flex flex-wrap items-center justify-between gap-3">
@@ -41,7 +41,7 @@
                 @if (is_array($element))
                     @foreach ($element as $page => $url)
                         @if ($page == $paginator->currentPage())
-                            <span aria-current="page" class="{{ $linkClasses }} bg-indigo-600 text-white">
+                            <span aria-current="page" class="{{ $linkClasses }} bg-slate-900 text-white">
                                 {{ $page }}
                             </span>
                         @else

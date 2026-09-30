@@ -11,7 +11,7 @@
 
     <div class="mx-auto max-w-6xl px-4 py-12 sm:px-6 lg:px-8">
         <nav aria-label="Breadcrumb" class="text-sm">
-            <a href="{{ route('games.index') }}" class="text-slate-500 transition hover:text-indigo-600">Game</a>
+            <a href="{{ route('games.index') }}" class="text-slate-500 transition hover:text-slate-900">Game</a>
             <span class="mx-1.5 text-slate-300">/</span>
             <span class="font-medium text-slate-900">{{ $game->name }}</span>
         </nav>
@@ -77,7 +77,7 @@
         @else
             <div class="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
                 @foreach ($accounts as $account)
-                    @include('public.partials.account-card', ['account' => $account, 'game' => $game])
+                    <x-account-card :account="$account" :game="$game" />
                 @endforeach
             </div>
 

@@ -15,7 +15,7 @@
     @if ($actionUrl && $actionLabel)
         <a
             href="{{ $actionUrl }}"
-            class="mt-5 inline-flex items-center gap-2 text-sm font-semibold text-indigo-600 transition hover:text-indigo-500"
+            class="mt-5 inline-flex items-center gap-2 text-sm font-semibold text-slate-900 transition hover:text-emerald-700"
         >
             {{ $actionLabel }}
         </a>

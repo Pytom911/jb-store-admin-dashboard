@@ -27,15 +27,15 @@
     <body class="flex min-h-full flex-col bg-slate-50 font-sans text-slate-900 antialiased">
         <a
             href="#konten"
-            class="sr-only focus:not-sr-only focus:absolute focus:top-3 focus:left-3 focus:z-50 focus:rounded-lg focus:bg-white focus:px-4 focus:py-2 focus:text-sm focus:font-semibold focus:ring-2 focus:ring-indigo-500"
+            class="sr-only focus:not-sr-only focus:absolute focus:top-3 focus:left-3 focus:z-50 focus:rounded-lg focus:bg-white focus:px-4 focus:py-2 focus:text-sm focus:font-semibold focus:ring-2 focus:ring-emerald-600"
         >
             Lewati ke konten
         </a>
 
         <header class="sticky top-0 z-40 border-b border-slate-200 bg-white/90 backdrop-blur">
             <div class="mx-auto flex h-16 max-w-6xl items-center gap-3 px-4 sm:px-6 lg:px-8">
-                <a href="{{ route('home') }}" class="flex items-center gap-2.5 focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:ring-offset-2">
-                    <span class="inline-flex h-9 w-9 items-center justify-center rounded-lg bg-indigo-600 text-base font-bold text-white">
+                <a href="{{ route('home') }}" class="flex items-center gap-2.5 focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-600 focus-visible:ring-offset-2">
+                    <span class="inline-flex h-9 w-9 items-center justify-center rounded-lg bg-slate-900 text-base font-bold text-white">
                         {{ strtoupper(mb_substr(config('app.name'), 0, 1)) }}
                     </span>
 
@@ -47,7 +47,7 @@
                         <a
                             href="{{ route($item['route']) }}"
                             @if (request()->routeIs($item['active'])) aria-current="page" @endif
-                            class="rounded-lg px-3 py-2 text-sm font-medium transition {{ request()->routeIs($item['active']) ? 'bg-slate-100 text-slate-900' : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900' }}"
+                                class="rounded-lg px-3 py-2 text-sm font-medium transition {{ request()->routeIs($item['active']) ? 'bg-slate-900 text-white hover:bg-slate-900' : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900' }}"
                         >
                             {{ $item['label'] }}
                         </a>
@@ -126,7 +126,7 @@
                             <a
                                 href="{{ route($item['route']) }}"
                                 @if (request()->routeIs($item['active'])) aria-current="page" @endif
-                                class="rounded-lg px-3 py-2.5 text-sm font-medium transition {{ request()->routeIs($item['active']) ? 'bg-indigo-50 text-indigo-700' : 'text-slate-700 hover:bg-slate-100' }}"
+                                class="rounded-lg px-3 py-2.5 text-sm font-medium transition {{ request()->routeIs($item['active']) ? 'bg-slate-900 text-white hover:bg-slate-900' : 'text-slate-700 hover:bg-slate-100' }}"
                             >
                                 {{ $item['label'] }}
                             </a>

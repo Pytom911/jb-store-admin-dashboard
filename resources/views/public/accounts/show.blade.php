@@ -10,7 +10,7 @@
 
     <div class="mx-auto max-w-5xl px-4 py-12 sm:px-6 lg:px-8">
         <nav aria-label="Breadcrumb" class="text-sm">
-            <a href="{{ route('accounts.index') }}" class="text-slate-500 transition hover:text-indigo-600">Katalog akun</a>
+            <a href="{{ route('accounts.index') }}" class="text-slate-500 transition hover:text-slate-900">Katalog akun</a>
             <span class="mx-1.5 text-slate-300">/</span>
             <span class="font-medium text-slate-900">{{ $account->account_code }}</span>
         </nav>
@@ -21,7 +21,7 @@
                     <div class="flex flex-wrap items-center gap-3">
                         <a
                             href="{{ route('games.show', $account->game) }}"
-                            class="rounded-md bg-slate-100 px-2.5 py-1 text-xs font-medium text-slate-600 transition hover:bg-indigo-50 hover:text-indigo-700"
+                            class="rounded-md bg-slate-100 px-2.5 py-1 text-xs font-medium text-slate-600 transition hover:bg-emerald-50 hover:text-emerald-800"
                         >
                             {{ $account->game->name }}
                         </a>

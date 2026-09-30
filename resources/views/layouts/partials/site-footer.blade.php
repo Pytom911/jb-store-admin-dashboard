@@ -7,7 +7,7 @@
         <div class="grid gap-10 sm:grid-cols-2 lg:grid-cols-4">
             <div class="lg:col-span-2">
                 <a href="{{ route('home') }}" class="flex items-center gap-2.5">
-                    <span class="inline-flex h-9 w-9 items-center justify-center rounded-lg bg-indigo-600 text-base font-bold text-white">
+                    <span class="inline-flex h-9 w-9 items-center justify-center rounded-lg bg-slate-900 text-base font-bold text-white">
                         {{ strtoupper(mb_substr(config('app.name'), 0, 1)) }}
                     </span>
 
@@ -32,7 +32,7 @@
                         <li>
                             <a
                                 href="{{ route($item['route']) }}"
-                                class="text-slate-500 transition hover:text-indigo-600"
+                                class="text-slate-500 transition hover:text-emerald-700"
                             >
                                 {{ $item['label'] }}
                             </a>
@@ -57,7 +57,7 @@
                     </li>
                     <li>Setiap hari, 09.00 &ndash; 21.00 WIB</li>
                     <li>
-                        <a href="{{ route('login') }}" class="transition hover:text-indigo-600">Masuk ke Admin</a>
+                        <a href="{{ route('login') }}" class="transition hover:text-slate-900">Masuk ke Admin</a>
                     </li>
                 </ul>
             </div>

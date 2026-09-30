@@ -84,7 +84,7 @@
         @else
             <div class="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
                 @foreach ($accounts as $account)
-                    @include('public.partials.account-card', ['account' => $account])
+                    <x-account-card :account="$account" />
                 @endforeach
             </div>
 

@@ -6,6 +6,7 @@ use App\Models\Account;
 use App\Models\AccountImage;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Validation\ValidationException;
 
 /**
  * Owns the files behind AccountImage rows and keeps the cover invariant: as long as
@@ -26,6 +27,8 @@ class AccountImageService
     {
         $files = array_values($files);
 
+        $this->guardQuota($account, count($files));
+
         if ($files === []) {
             return;
         }
@@ -33,7 +36,7 @@ class AccountImageService
         $coverPending = ! $account->coverImage()->exists();
         $coverAssigned = false;
 
-        foreach (array_values($files) as $index => $file) {
+        foreach ($files as $index => $file) {
             $isCover = $coverPending && $wantsCover && $index === 0;
 
             $account->images()->create([
@@ -79,6 +82,20 @@ class AccountImageService
         }
 
         $account->images()->delete();
+    }
+
+    /**
+     * Both the account form and the gallery shortcut feed files in here, so the
+     * per-account ceiling is enforced in one place rather than in each request.
+     * Runs before anything reaches the disk, so a rejected batch leaves no files.
+     */
+    private function guardQuota(Account $account, int $incoming): void
+    {
+        if ($account->remainingImageSlots() < $incoming) {
+            throw ValidationException::withMessages([
+                'images' => 'Maksimal '.AccountImage::MAX_PER_ACCOUNT.' gambar per akun. Hapus salah satu gambar lama dulu.',
+            ]);
+        }
     }
 
     /**

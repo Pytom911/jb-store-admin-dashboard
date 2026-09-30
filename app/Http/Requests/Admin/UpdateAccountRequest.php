@@ -8,7 +8,6 @@ use App\Models\AccountImage;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
-use Illuminate\Validation\Validator;
 
 class UpdateAccountRequest extends FormRequest
 {
@@ -46,30 +45,6 @@ class UpdateAccountRequest extends FormRequest
         if ($this->filled('account_code')) {
             $this->merge(['account_code' => Str::upper(trim((string) $this->input('account_code')))]);
         }
-    }
-
-    /**
-     * The max rule above only counts the files in this request, so an account that
-     * already holds images could still be pushed past the per-account limit here.
-     */
-    public function withValidator(Validator $validator): void
-    {
-        $validator->after(function (Validator $validator) {
-            $account = $this->account();
-
-            if (! $account) {
-                return;
-            }
-
-            $total = $account->images()->count() + count($this->file('images', []));
-
-            if ($total > AccountImage::MAX_PER_ACCOUNT) {
-                $validator->errors()->add(
-                    'images',
-                    'Maksimal '.AccountImage::MAX_PER_ACCOUNT.' gambar per akun. Kosongkan salah satu gambar lama dulu.',
-                );
-            }
-        });
     }
 
     /**

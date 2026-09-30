@@ -6,6 +6,8 @@ use App\Models\Account;
 use App\Models\Game;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\Storage;
 use Tests\TestCase;
 
 class WiringTest extends TestCase
@@ -27,6 +29,7 @@ class WiringTest extends TestCase
             ['get', '/admin/accounts/1/edit'],
             ['put', '/admin/accounts/1'],
             ['delete', '/admin/accounts/1'],
+            ['post', '/admin/accounts/1/images'],
             ['patch', '/admin/accounts/1/images/1'],
             ['delete', '/admin/accounts/1/images/1'],
             ['get', '/admin/settings'],
@@ -48,15 +51,23 @@ class WiringTest extends TestCase
 
     public function test_account_image_routes_are_admin_only(): void
     {
+        Storage::fake('public');
+
         $account = Account::factory()->create();
         $image = $account->images()->create(['path' => 'accounts/a.jpg', 'is_cover' => true]);
 
         $this->actingAs(User::factory()->create(['role' => 'customer']));
 
+        $this->post("/admin/accounts/{$account->id}/images", [
+            'images' => [UploadedFile::fake()->create('sisip.jpg', 64, 'image/jpeg')],
+        ])->assertForbidden();
+
         $this->patch("/admin/accounts/{$account->id}/images/{$image->id}")->assertForbidden();
         $this->delete("/admin/accounts/{$account->id}/images/{$image->id}")->assertForbidden();
 
         $this->assertTrue($image->fresh()->is_cover);
+        $this->assertSame(1, $account->images()->count());
+        Storage::disk('public')->assertMissing('accounts/sisip.jpg');
     }
 
     public function test_authenticated_admins_pass_the_middleware(): void

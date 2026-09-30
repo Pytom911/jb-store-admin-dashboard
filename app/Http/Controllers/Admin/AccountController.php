@@ -62,7 +62,7 @@ class AccountController extends Controller
         $this->images->storeMany($account, $request->file('images', []), $request->boolean('cover_first'));
 
         return redirect()
-            ->route('admin.accounts.index')
+            ->route('admin.accounts.show', $account)
             ->with('success', "Akun {$account->account_code} berhasil ditambahkan.");
     }
 
@@ -88,7 +88,7 @@ class AccountController extends Controller
         $this->images->storeMany($account, $request->file('images', []), $request->boolean('cover_first'));
 
         return redirect()
-            ->route('admin.accounts.index')
+            ->route('admin.accounts.show', $account)
             ->with('success', "Akun {$account->account_code} berhasil diperbarui.");
     }
 

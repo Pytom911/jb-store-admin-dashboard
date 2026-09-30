@@ -142,17 +142,18 @@ class AdminCrudTest extends TestCase
     {
         $game = Game::factory()->create();
 
-        $this->actingAs($this->admin)
-            ->post('/admin/accounts', [
-                'game_id' => $game->id,
-                'account_code' => 'ML-001',
-                'title' => 'Akun Sultan',
-                'description' => 'Sudah punya 120 skin.',
-                'price' => 150000,
-                'status' => AccountStatus::Available->value,
-            ])
-            ->assertRedirect(route('admin.accounts.index'))
-            ->assertSessionHas('success');
+        $response = $this->actingAs($this->admin)->post('/admin/accounts', [
+            'game_id' => $game->id,
+            'account_code' => 'ML-001',
+            'title' => 'Akun Sultan',
+            'description' => 'Sudah punya 120 skin.',
+            'price' => 150000,
+            'status' => AccountStatus::Available->value,
+        ]);
+
+        $account = Account::query()->sole();
+
+        $response->assertRedirect(route('admin.accounts.show', $account))->assertSessionHas('success');
 
         $this->assertDatabaseHas('accounts', [
             'game_id' => $game->id,
@@ -174,7 +175,7 @@ class AdminCrudTest extends TestCase
                 'price' => 275000,
                 'status' => AccountStatus::Sold->value,
             ])
-            ->assertRedirect(route('admin.accounts.index'))
+            ->assertRedirect(route('admin.accounts.show', $account))
             ->assertSessionHas('success');
 
         $this->assertDatabaseHas('accounts', [
@@ -203,24 +204,23 @@ class AdminCrudTest extends TestCase
 
         $game = Game::factory()->create();
 
-        $this->actingAs($this->admin)
-            ->post('/admin/accounts', [
-                'game_id' => $game->id,
-                'account_code' => 'ML-500',
-                'title' => 'Akun Sultan',
-                'price' => 150000,
-                'status' => AccountStatus::Available->value,
-                'cover_first' => '1',
-                'images' => [
-                    UploadedFile::fake()->create('satu.jpg', 64, 'image/jpeg'),
-                    UploadedFile::fake()->create('dua.jpg', 64, 'image/jpeg'),
-                    UploadedFile::fake()->create('tiga.jpg', 64, 'image/jpeg'),
-                ],
-            ])
-            ->assertRedirect(route('admin.accounts.index'))
-            ->assertSessionHas('success');
+        $response = $this->actingAs($this->admin)->post('/admin/accounts', [
+            'game_id' => $game->id,
+            'account_code' => 'ML-500',
+            'title' => 'Akun Sultan',
+            'price' => 150000,
+            'status' => AccountStatus::Available->value,
+            'cover_first' => '1',
+            'images' => [
+                UploadedFile::fake()->create('satu.jpg', 64, 'image/jpeg'),
+                UploadedFile::fake()->create('dua.jpg', 64, 'image/jpeg'),
+                UploadedFile::fake()->create('tiga.jpg', 64, 'image/jpeg'),
+            ],
+        ]);
 
         $account = Account::query()->sole();
+
+        $response->assertRedirect(route('admin.accounts.show', $account))->assertSessionHas('success');
 
         $this->assertCount(3, $account->images);
 
@@ -323,6 +323,103 @@ class AdminCrudTest extends TestCase
         ])->assertSessionHasErrors('images');
 
         $this->assertCount(AccountImage::MAX_PER_ACCOUNT, $account->fresh()->images);
+    }
+
+    public function test_images_can_be_added_from_the_account_detail_page(): void
+    {
+        Storage::fake('public');
+
+        $account = Account::factory()->create(['account_code' => 'ML-700']);
+        $account->images()->create(['path' => 'accounts/awal.jpg', 'is_cover' => true]);
+
+        $this->actingAs($this->admin)
+            ->from("/admin/accounts/{$account->id}")
+            ->post("/admin/accounts/{$account->id}/images", [
+                'images' => [
+                    UploadedFile::fake()->create('baru-satu.jpg', 64, 'image/jpeg'),
+                    UploadedFile::fake()->create('baru-dua.jpg', 64, 'image/jpeg'),
+                ],
+            ])
+            ->assertRedirect("/admin/accounts/{$account->id}")
+            ->assertSessionHas('success');
+
+        $account->refresh();
+
+        $this->assertCount(3, $account->images);
+
+        // The seeded row has no file behind it, so only the two uploads land on disk.
+        $this->assertCount(2, Storage::disk('public')->allFiles('accounts'));
+
+        // The existing cover survives an upload that does not ask for a new one.
+        $this->assertSame('accounts/awal.jpg', $account->coverImage->path);
+    }
+
+    public function test_adding_images_from_the_detail_page_respects_the_remaining_quota(): void
+    {
+        Storage::fake('public');
+
+        $account = Account::factory()->create();
+        $account->images()->createMany(array_map(
+            fn (int $index) => ['path' => "accounts/isi-{$index}.jpg", 'is_cover' => $index === 1],
+            range(1, AccountImage::MAX_PER_ACCOUNT),
+        ));
+
+        $this->actingAs($this->admin)
+            ->post("/admin/accounts/{$account->id}/images", [
+                'images' => [UploadedFile::fake()->create('tambahan.jpg', 64, 'image/jpeg')],
+            ])
+            ->assertSessionHasErrors('images');
+
+        $this->assertCount(AccountImage::MAX_PER_ACCOUNT, $account->fresh()->images);
+        Storage::disk('public')->assertMissing('accounts/tambahan.jpg');
+    }
+
+    public function test_the_first_image_added_from_the_detail_page_becomes_the_cover(): void
+    {
+        Storage::fake('public');
+
+        $account = Account::factory()->create();
+
+        $this->actingAs($this->admin)
+            ->post("/admin/accounts/{$account->id}/images", [
+                'images' => [
+                    UploadedFile::fake()->create('pertama.jpg', 64, 'image/jpeg'),
+                    UploadedFile::fake()->create('kedua.jpg', 64, 'image/jpeg'),
+                ],
+            ])
+            ->assertSessionHas('success');
+
+        $account->refresh();
+
+        $this->assertSame($account->images->first()->path, $account->coverImage->path);
+        $this->assertCount(1, $account->images()->where('is_cover', true)->get());
+    }
+
+    public function test_the_account_detail_page_reports_the_remaining_upload_slots(): void
+    {
+        Storage::fake('public');
+
+        $account = Account::factory()->create();
+        $account->images()->createMany([
+            ['path' => 'accounts/a.jpg', 'is_cover' => true],
+            ['path' => 'accounts/b.jpg', 'is_cover' => false],
+        ]);
+
+        $this->actingAs($this->admin)->get("/admin/accounts/{$account->id}")
+            ->assertOk()
+            ->assertSee('maksimal '.(AccountImage::MAX_PER_ACCOUNT - 2).' lagi', false)
+            ->assertSee(route('admin.accounts.images.store', $account), false)
+            ->assertSee('name="images[]"', false);
+
+        $account->images()->createMany(array_map(
+            fn (int $index) => ['path' => "accounts/penuh-{$index}.jpg", 'is_cover' => false],
+            range(1, AccountImage::MAX_PER_ACCOUNT - 2),
+        ));
+
+        $this->actingAs($this->admin)->get("/admin/accounts/{$account->id}")
+            ->assertOk()
+            ->assertSee('Kuota gambar sudah penuh', false)
+            ->assertDontSee('name="images[]"', false);
     }
 
     public function test_an_image_can_be_promoted_to_cover(): void

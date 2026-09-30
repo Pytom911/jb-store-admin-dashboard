@@ -40,6 +40,8 @@ Route::middleware(['auth', 'admin'])
         Route::resource('games', AdminGameController::class)->except('show');
         Route::resource('accounts', AdminAccountController::class);
 
+        Route::post('accounts/{account}/images', [AccountImageController::class, 'store'])
+            ->name('accounts.images.store');
         Route::patch('accounts/{account}/images/{image}', [AccountImageController::class, 'update'])
             ->name('accounts.images.update');
         Route::delete('accounts/{account}/images/{image}', [AccountImageController::class, 'destroy'])

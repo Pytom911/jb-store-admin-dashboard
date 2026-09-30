@@ -3,6 +3,10 @@
 @section('title', $account->account_code)
 @section('header', $account->account_code)
 
+@php
+    $remainingSlots = $account->remainingImageSlots();
+@endphp
+
 @section('content')
     <div class="space-y-5">
         <div class="flex flex-wrap items-start justify-between gap-3">
@@ -27,10 +31,6 @@
                     Galeri
                     <span class="ml-1 font-normal text-slate-400">{{ $account->images->count() }} gambar</span>
                 </h3>
-
-                <x-button :href="route('admin.accounts.edit', $account)" variant="secondary" class="px-3 py-1.5">
-                    Tambah Gambar
-                </x-button>
             </header>
 
             @if ($account->images->isEmpty())
@@ -83,6 +83,46 @@
                     @endforeach
                 </ul>
             @endif
+
+            {{-- Kept as a sibling of the grid rather than nested in it, since a form cannot contain another form. --}}
+            <form
+                method="POST"
+                action="{{ route('admin.accounts.images.store', $account) }}"
+                enctype="multipart/form-data"
+                class="border-t border-slate-200 px-5 py-4"
+            >
+                @csrf
+
+                <h4 class="mb-3 text-xs font-semibold tracking-wider text-slate-500 uppercase">Tambah Gambar</h4>
+
+                @if ($remainingSlots > 0)
+                    <x-form.file
+                        name="images[]"
+                        :multiple="true"
+                        :help="'Pilih beberapa gambar sekaligus, maksimal '.$remainingSlots.' lagi. Format JPG, PNG, atau WEBP, maksimal 2 MB per file.'"
+                    />
+
+                    @if ($account->images->isEmpty())
+                        <label class="mt-3 flex items-start gap-2.5 text-sm text-slate-600">
+                            <input
+                                type="checkbox"
+                                name="cover_first"
+                                value="1"
+                                class="mt-0.5 h-4 w-4 shrink-0 rounded border-slate-300 text-indigo-600 focus:ring-indigo-500/20"
+                            />
+                            <span>Jadikan gambar pertama sebagai sampul akun ini.</span>
+                        </label>
+                    @endif
+
+                    <div class="mt-3">
+                        <x-button type="submit">Tambah Gambar</x-button>
+                    </div>
+                @else
+                    <p class="text-xs text-slate-500">
+                        Kuota gambar sudah penuh. Hapus gambar lama untuk menambah yang baru.
+                    </p>
+                @endif
+            </form>
         </section>
 
         <section class="rounded-xl bg-white ring-1 ring-slate-200">

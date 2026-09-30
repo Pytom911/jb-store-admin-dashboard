@@ -21,7 +21,7 @@
 
         <div class="flex flex-wrap items-center gap-3">
             <x-button type="submit">Simpan Perubahan</x-button>
-            <x-button :href="route('admin.accounts.index')" variant="secondary">Batal</x-button>
+            <x-button :href="route('admin.accounts.show', $account)" variant="secondary">Batal</x-button>
         </div>
     </form>
 @endsection

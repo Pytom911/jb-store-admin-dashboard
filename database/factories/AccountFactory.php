@@ -24,8 +24,6 @@ class AccountFactory extends Factory
             'account_code' => 'TEST-'.fake()->unique()->numerify('####'),
             'game_id' => Game::factory(),
             'title' => Str::title(fake()->words(3, true)),
-            'username' => fake()->userName(),
-            'password' => Str::password(12),
             'description' => fake()->sentence(),
             'price' => fake()->numberBetween(25_000, 2_500_000),
             'status' => AccountStatus::Available->value,

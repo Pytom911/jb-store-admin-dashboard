@@ -33,7 +33,7 @@
                     </h1>
 
                     <p class="mt-5 max-w-lg text-base leading-relaxed text-slate-300">
-                        Pilih akun dari katalog, konfirmasi lewat WhatsApp, dan username serta password dikirim
+                        Pilih akun dari katalog, konfirmasi lewat WhatsApp, dan data login dikirim
                         setelah pembayaran. Ada garansi 7 hari.
                     </p>
 
@@ -190,7 +190,7 @@
             @foreach ([
                 ['title' => 'Pilih akun', 'body' => 'Telusuri katalog atau kategori game. Status dan harga tertera di setiap kartu.'],
                 ['title' => 'Konfirmasi via WhatsApp', 'body' => 'Tekan tombol pesan di kartu akun. Kode akun ikut terkirim supaya tidak salah.'],
-                ['title' => 'Transfer dan masuk', 'body' => 'Setelah pembayaran, username dan password dikirim. Ada garansi 7 hari.'],
+                ['title' => 'Transfer dan masuk', 'body' => 'Setelah pembayaran, data login dikirim. Ada garansi 7 hari.'],
             ] as $index => $step)
                 <li class="rounded-xl bg-white p-6 ring-1 ring-slate-200">
                     <span class="inline-flex h-8 w-8 items-center justify-center rounded-lg bg-indigo-50 text-sm font-semibold text-indigo-600">

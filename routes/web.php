@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Admin\AccountController as AdminAccountController;
+use App\Http\Controllers\Admin\AccountImageController;
 use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\GameController as AdminGameController;
 use App\Http\Controllers\Admin\SettingsController;
@@ -38,4 +39,9 @@ Route::middleware(['auth', 'admin'])
 
         Route::resource('games', AdminGameController::class)->except('show');
         Route::resource('accounts', AdminAccountController::class);
+
+        Route::patch('accounts/{account}/images/{image}', [AccountImageController::class, 'update'])
+            ->name('accounts.images.update');
+        Route::delete('accounts/{account}/images/{image}', [AccountImageController::class, 'destroy'])
+            ->name('accounts.images.destroy');
     });

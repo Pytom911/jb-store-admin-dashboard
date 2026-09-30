@@ -5,41 +5,24 @@ namespace App\Models;
 use App\Enums\AccountStatus;
 use Database\Factories\AccountFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
-use Illuminate\Database\Eloquent\Attributes\Hidden;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Support\Number;
 
-#[Fillable(['account_code', 'game_id', 'title', 'username', 'password', 'description', 'price', 'status'])]
-#[Hidden(['username', 'password'])]
+#[Fillable(['account_code', 'game_id', 'title', 'description', 'price', 'status'])]
 class Account extends Model
 {
     /** @use HasFactory<AccountFactory> */
     use HasFactory;
 
-    /**
-     * The only columns public queries are allowed to load. Username and password
-     * are deliberately absent so customer-facing pages cannot render them by accident.
-     */
-    public const PUBLIC_COLUMNS = [
-        'id',
-        'account_code',
-        'game_id',
-        'title',
-        'description',
-        'price',
-        'status',
-        'created_at',
-        'updated_at',
-    ];
-
     protected function casts(): array
     {
         return [
             'price' => 'decimal:2',
-            'password' => 'encrypted',
             'status' => AccountStatus::class,
         ];
     }
@@ -49,9 +32,46 @@ class Account extends Model
         return $this->belongsTo(Game::class);
     }
 
-    public function scopeWithoutCredentials(Builder $query): Builder
+    /**
+     * Cover first, then oldest. The order is stated explicitly because the
+     * (account_id, is_cover) index is enough for the database to return rows in
+     * is_cover order on its own, which would file the cover last in the galleries.
+     */
+    public function images(): HasMany
     {
-        return $query->select(self::PUBLIC_COLUMNS);
+        return $this->hasMany(AccountImage::class)
+            ->orderByDesc('is_cover')
+            ->orderBy('id');
+    }
+
+    /**
+     * The single image listings render. Deliberately not ofMany(): a plain
+     * where + orderBy resolves in one query for every account an eager load
+     * covers, where ofMany() would add an aggregate subquery per relation.
+     */
+    public function coverImage(): HasOne
+    {
+        return $this->hasOne(AccountImage::class)
+            ->where('is_cover', true)
+            ->orderBy('id');
+    }
+
+    /**
+     * Attaches the detail image count in one extra query, so listing pages can
+     * badge the "more images" counter without touching the relation per row.
+     */
+    public function scopeWithImageCount(Builder $query): Builder
+    {
+        return $query->withCount('images');
+    }
+
+    public function remainingImageSlots(): int
+    {
+        if (! $this->exists) {
+            return AccountImage::MAX_PER_ACCOUNT;
+        }
+
+        return max(0, AccountImage::MAX_PER_ACCOUNT - $this->images()->count());
     }
 
     public function scopeAvailable(Builder $query): Builder

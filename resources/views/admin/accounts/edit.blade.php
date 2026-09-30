@@ -4,7 +4,12 @@
 @section('header', 'Edit Akun')
 
 @section('content')
-    <form method="POST" action="{{ route('admin.accounts.update', $account) }}" class="space-y-5">
+    <form
+        method="POST"
+        action="{{ route('admin.accounts.update', $account) }}"
+        enctype="multipart/form-data"
+        class="space-y-5"
+    >
         @csrf
         @method('PUT')
 

@@ -48,19 +48,43 @@ class PublicPagesTest extends TestCase
         $this->get('/')->assertOk()->assertDontSee('Game Nonaktif');
     }
 
-    public function test_public_pages_never_leak_account_credentials(): void
+    public function test_public_pages_only_expose_listing_fields(): void
     {
         $game = Game::factory()->create();
-        $account = Account::factory()->for($game)->create([
-            'username' => 'rahasia_username_akun',
-            'password' => 'rahasia_password_akun',
-        ]);
+        $account = Account::factory()->for($game)->create(['title' => 'Akun Sultan Mono']);
 
-        $this->get('/')->assertDontSee('rahasia_username_akun')->assertDontSee('rahasia_password_akun');
-        $this->get('/accounts')->assertDontSee('rahasia_username_akun')->assertDontSee('rahasia_password_akun');
+        // The credential columns no longer exist, so a leaked one could only come
+        // from an attribute the model still exposes. Guard both entry points.
+        foreach (['/', '/accounts', "/accounts/{$account->account_code}"] as $uri) {
+            $this->get($uri)
+                ->assertOk()
+                ->assertDontSee('username')
+                ->assertDontSee('password')
+                ->assertSee('Akun Sultan Mono');
+        }
+
+        $this->assertArrayNotHasKey('username', $account->getAttributes());
+        $this->assertArrayNotHasKey('password', $account->getAttributes());
+    }
+
+    public function test_account_covers_and_galleries_render_on_public_pages(): void
+    {
+        Storage::fake('public');
+
+        $game = Game::factory()->create();
+        $account = Account::factory()->for($game)->create();
+
+        $cover = $account->images()->create(['path' => 'accounts/sampul.jpg', 'is_cover' => true]);
+        $detail = $account->images()->create(['path' => 'accounts/detail.jpg', 'is_cover' => false]);
+
+        $this->get('/accounts')
+            ->assertOk()
+            ->assertSee($cover->url, false);
+
         $this->get("/accounts/{$account->account_code}")
-            ->assertDontSee('rahasia_username_akun')
-            ->assertDontSee('rahasia_password_akun');
+            ->assertOk()
+            ->assertSee($cover->url, false)
+            ->assertSee($detail->url, false);
     }
 
     public function test_home_shows_the_counter_totals(): void

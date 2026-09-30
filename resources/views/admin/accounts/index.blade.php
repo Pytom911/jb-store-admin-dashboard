@@ -79,6 +79,7 @@
                         <thead class="bg-slate-50 text-left text-xs font-semibold tracking-wider text-slate-500 uppercase">
                             <tr>
                                 <th scope="col" class="px-5 py-3">Kode</th>
+                                <th scope="col" class="px-5 py-3">Gambar</th>
                                 <th scope="col" class="px-5 py-3">Judul</th>
                                 <th scope="col" class="px-5 py-3">Game</th>
                                 <th scope="col" class="px-5 py-3 text-right">Harga</th>
@@ -97,6 +98,33 @@
                                         >
                                             {{ $account->account_code }}
                                         </a>
+                                    </td>
+                                    <td class="px-5 py-3">
+                                        @if ($account->coverImage)
+                                            <div class="relative w-fit">
+                                                <img
+                                                    src="{{ $account->coverImage->url }}"
+                                                    alt="Sampul akun {{ $account->account_code }}"
+                                                    class="h-10 w-10 rounded-lg object-cover ring-1 ring-slate-200"
+                                                />
+
+                                                @if ($account->images_count > 1)
+                                                    <span class="absolute -right-1.5 -bottom-1.5 rounded-full bg-slate-900 px-1.5 py-0.5 text-[10px] leading-none font-semibold text-white ring-2 ring-white">
+                                                        +{{ $account->images_count - 1 }}
+                                                    </span>
+                                                @endif
+                                            </div>
+                                        @else
+                                            <span class="flex h-10 w-10 items-center justify-center rounded-lg bg-slate-100 text-slate-400 ring-1 ring-slate-200">
+                                                <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                                                    <path
+                                                        stroke-linecap="round"
+                                                        stroke-linejoin="round"
+                                                        d="m2.25 15.75 5.159-5.159a2.25 2.25 0 0 1 3.182 0l5.159 5.159m-1.5-1.5 1.409-1.409a2.25 2.25 0 0 1 3.182 0l2.909 2.909M3.75 21h16.5A1.5 1.5 0 0 0 21.75 19.5V4.5A1.5 1.5 0 0 0 20.25 3H3.75A1.5 1.5 0 0 0 2.25 4.5v15A1.5 1.5 0 0 0 3.75 21Zm10.5-11.25h.008v.008h-.008V9.75Z"
+                                                    />
+                                                </svg>
+                                            </span>
+                                        @endif
                                     </td>
                                     <td class="px-5 py-3 text-slate-600">{{ $account->title }}</td>
                                     <td class="px-5 py-3 text-slate-600">{{ $account->game->name }}</td>
@@ -121,7 +149,7 @@
                                                 variant="ghost"
                                                 class="px-2.5 py-1.5 text-red-600 hover:bg-red-50 hover:text-red-700"
                                                 data-confirm-url="{{ route('admin.accounts.destroy', $account) }}"
-                                                data-confirm-message="Hapus akun {{ $account->account_code }}? Kredensial yang tersimpan ikut terhapus dan tidak bisa dikembalikan."
+                                                data-confirm-message="Hapus akun {{ $account->account_code }}? Data akun dan gambar-gambarnya ikut terhapus dan tidak bisa dikembalikan."
                                             >
                                                 Hapus
                                             </x-button>

@@ -37,6 +37,28 @@
                         {{ $account->formattedPrice() }}
                     </p>
 
+                    @if ($account->images->isNotEmpty())
+                        <div class="mt-6 border-t border-slate-200 pt-6">
+                            <h2 class="text-sm font-semibold text-slate-900">
+                                Detail Akun
+                                <span class="ml-1 font-normal text-slate-400">{{ $account->images->count() }} foto</span>
+                            </h2>
+
+                            <ul class="mt-4 grid gap-3 sm:grid-cols-2">
+                                @foreach ($account->images as $image)
+                                    <li>
+                                        <img
+                                            src="{{ $image->url }}"
+                                            alt="Detail akun {{ $account->account_code }} — foto {{ $loop->iteration }}"
+                                            class="w-full rounded-lg object-cover ring-1 ring-slate-200"
+                                            loading="lazy"
+                                        />
+                                    </li>
+                                @endforeach
+                            </ul>
+                        </div>
+                    @endif
+
                     @if ($account->description)
                         <div class="mt-6 border-t border-slate-200 pt-6">
                             <h2 class="text-sm font-semibold text-slate-900">Keterangan</h2>

@@ -22,50 +22,67 @@
         </div>
 
         <section class="rounded-xl bg-white ring-1 ring-slate-200">
-            <header class="border-b border-slate-200 px-5 py-4">
-                <h3 class="text-sm font-semibold text-slate-900">Kredensial</h3>
+            <header class="flex flex-wrap items-center justify-between gap-2 border-b border-slate-200 px-5 py-4">
+                <h3 class="text-sm font-semibold text-slate-900">
+                    Galeri
+                    <span class="ml-1 font-normal text-slate-400">{{ $account->images->count() }} gambar</span>
+                </h3>
+
+                <x-button :href="route('admin.accounts.edit', $account)" variant="secondary" class="px-3 py-1.5">
+                    Tambah Gambar
+                </x-button>
             </header>
 
-            <dl class="grid gap-5 p-5 sm:grid-cols-2">
-                <div>
-                    <dt class="text-xs font-semibold tracking-wider text-slate-500 uppercase">Username</dt>
-                    <dd class="mt-1 font-mono text-sm text-slate-900">{{ $account->username }}</dd>
-                </div>
+            @if ($account->images->isEmpty())
+                <p class="px-5 py-8 text-center text-sm text-slate-500">
+                    Belum ada gambar. Tambahkan screenshot detail akun supaya pembeli bisa melihat apa yang mereka dapat.
+                </p>
+            @else
+                <ul class="grid gap-4 p-5 sm:grid-cols-3">
+                    @foreach ($account->images as $image)
+                        <li class="overflow-hidden rounded-lg ring-1 ring-slate-200">
+                            <div class="relative bg-slate-50">
+                                <img
+                                    src="{{ $image->url }}"
+                                    alt="Gambar detail {{ $account->account_code }}"
+                                    class="aspect-video w-full object-cover"
+                                />
 
-                <div>
-                    <dt class="text-xs font-semibold tracking-wider text-slate-500 uppercase">Password</dt>
-                    <dd class="mt-1 flex items-center gap-2">
-                        <input
-                            id="account-password"
-                            type="password"
-                            readonly
-                            value="{{ $account->password }}"
-                            class="min-w-0 flex-1 rounded-lg border border-slate-300 bg-slate-50 px-3 py-2 font-mono text-sm text-slate-900"
-                        />
+                                @if ($image->is_cover)
+                                    <span class="absolute top-2 left-2 rounded bg-indigo-600 px-2 py-0.5 text-xs font-semibold text-white">
+                                        Sampul
+                                    </span>
+                                @endif
+                            </div>
 
-                        <button
-                            type="button"
-                            data-reveal="account-password"
-                            aria-label="Lihat password"
-                            class="shrink-0 rounded-lg p-2 text-slate-400 transition hover:bg-slate-100 hover:text-slate-700 focus:outline-none focus-visible:text-slate-700"
-                        >
-                            <svg data-eye class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-                                <path stroke-linecap="round" stroke-linejoin="round"
-                                    d="M2.036 12.322a1.012 1.012 0 0 1 0-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178Z" />
-                                <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" />
-                            </svg>
-                            <svg data-eye-slash class="hidden h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-                                <path stroke-linecap="round" stroke-linejoin="round"
-                                    d="M3.98 8.223A10.477 10.477 0 0 0 1.934 12C3.226 16.338 7.244 19.5 12 19.5c.993 0 1.953-.138 2.863-.395M6.228 6.228A10.45 10.45 0 0 1 12 4.5c4.756 0 8.773 3.162 10.065 7.498a10.522 10.522 0 0 1-4.293 5.774M6.228 6.228 3 3m3.228 3.228 3.65 3.65m7.894 7.894L21 21m-3.228-3.228-3.65-3.65m0 0a3 3 0 1 0-4.243-4.243" />
-                            </svg>
-                        </button>
-                    </dd>
-                </div>
-            </dl>
+                            {{-- Each control owns its own form because HTML forbids nesting forms. --}}
+                            <div class="flex items-center justify-between gap-1 border-t border-slate-200 p-2">
+                                @if ($image->is_cover)
+                                    <span class="px-2.5 py-1.5 text-xs text-slate-400">Dipakai di katalog</span>
+                                @else
+                                    <form method="POST" action="{{ route('admin.accounts.images.update', [$account, $image]) }}">
+                                        @csrf
+                                        @method('PATCH')
+                                        <x-button type="submit" variant="ghost" class="px-2.5 py-1.5">
+                                            Jadikan Sampul
+                                        </x-button>
+                                    </form>
+                                @endif
 
-            <p class="border-t border-slate-200 bg-amber-50 px-5 py-3 text-xs text-amber-800">
-                Password tersimpan terenkripsi. Pastikan tidak dibagikan di channel publik.
-            </p>
+                                <x-button
+                                    type="button"
+                                    variant="ghost"
+                                    class="px-2.5 py-1.5 text-red-600 hover:bg-red-50 hover:text-red-700"
+                                    data-confirm-url="{{ route('admin.accounts.images.destroy', [$account, $image]) }}"
+                                    data-confirm-message="Hapus gambar ini dari akun {{ $account->account_code }}?"
+                                >
+                                    Hapus
+                                </x-button>
+                            </div>
+                        </li>
+                    @endforeach
+                </ul>
+            @endif
         </section>
 
         <section class="rounded-xl bg-white ring-1 ring-slate-200">

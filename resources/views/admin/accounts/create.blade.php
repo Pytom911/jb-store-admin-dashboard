@@ -4,7 +4,7 @@
 @section('header', 'Tambah Akun')
 
 @section('content')
-    <form method="POST" action="{{ route('admin.accounts.store') }}" class="space-y-5">
+    <form method="POST" action="{{ route('admin.accounts.store') }}" enctype="multipart/form-data" class="space-y-5">
         @csrf
 
         <section class="rounded-xl bg-white p-5 ring-1 ring-slate-200 sm:p-6">

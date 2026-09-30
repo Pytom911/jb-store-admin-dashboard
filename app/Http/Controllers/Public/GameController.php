@@ -34,9 +34,9 @@ class GameController extends Controller
         $game->loadCount(Game::stockCounts());
 
         $accounts = Account::query()
-            ->withoutCredentials()
             ->where('game_id', $game->id)
             ->where('status', $status)
+            ->with('coverImage')
             ->sorted($sort)
             ->paginate(config('marketplace.accounts_per_page'))
             ->withQueryString();

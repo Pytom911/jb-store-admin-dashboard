@@ -13,10 +13,6 @@ return new class extends Migration
             $table->string('account_code', 30)->unique();
             $table->foreignId('game_id')->constrained()->cascadeOnDelete();
             $table->string('title', 150);
-            $table->string('username', 150);
-            // The model casts this to encrypted, and the ciphertext is longer than
-            // the plaintext, so varchar(255) would silently truncate it.
-            $table->text('password');
             $table->text('description')->nullable();
             $table->decimal('price', 15, 2);
             $table->enum('status', ['available', 'reserved', 'sold'])->default('available')->index();

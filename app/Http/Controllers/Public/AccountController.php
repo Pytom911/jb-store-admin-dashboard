@@ -19,8 +19,7 @@ class AccountController extends Controller
         $sort = $request->string('sort')->trim()->value();
 
         $accounts = Account::query()
-            ->withoutCredentials()
-            ->with('game:id,name,slug,image')
+            ->with(['game:id,name,slug,image', 'coverImage'])
             ->search($search)
             ->where('status', in_array($status, AccountStatus::values(), true)
                 ? $status
@@ -50,8 +49,7 @@ class AccountController extends Controller
     public function show(string $account_code): View
     {
         $account = Account::query()
-            ->withoutCredentials()
-            ->with('game:id,name,slug,image')
+            ->with(['game:id,name,slug,image', 'images'])
             ->where('account_code', $account_code)
             ->firstOrFail();
 

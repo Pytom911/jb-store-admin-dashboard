@@ -3,6 +3,7 @@
 namespace App\Http\Requests\Admin;
 
 use App\Enums\AccountStatus;
+use App\Models\AccountImage;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
@@ -29,11 +30,12 @@ class StoreAccountRequest extends FormRequest
                 Rule::unique('accounts', 'account_code'),
             ],
             'title' => ['required', 'string', 'max:150'],
-            'username' => ['required', 'string', 'max:150'],
-            'password' => ['required', 'string', 'max:255'],
             'description' => ['nullable', 'string', 'max:5000'],
             'price' => ['required', 'numeric', 'min:0', 'max:9999999999999.99'],
             'status' => ['required', Rule::enum(AccountStatus::class)],
+            'images' => ['nullable', 'array', 'max:'.AccountImage::MAX_PER_ACCOUNT],
+            'images.*' => ['image', 'mimes:jpg,jpeg,png,webp', 'max:2048'],
+            'cover_first' => ['nullable', 'boolean'],
         ];
     }
 
@@ -53,6 +55,9 @@ class StoreAccountRequest extends FormRequest
             'account_code.regex' => 'Kode akun hanya boleh berisi huruf kapital, angka, dan tanda hubung (contoh: ML-001).',
             'account_code.unique' => 'Kode akun sudah dipakai akun lain.',
             'price.numeric' => 'Harga harus berupa angka.',
+            'images.max' => 'Maksimal '.AccountImage::MAX_PER_ACCOUNT.' gambar per akun.',
+            'images.*.mimes' => 'Gambar harus berformat JPG, PNG, atau WEBP.',
+            'images.*.max' => 'Ukuran setiap gambar maksimal 2 MB.',
         ];
     }
 
@@ -65,11 +70,11 @@ class StoreAccountRequest extends FormRequest
             'game_id' => 'game',
             'account_code' => 'kode akun',
             'title' => 'judul',
-            'username' => 'username',
-            'password' => 'password',
             'description' => 'deskripsi',
             'price' => 'harga',
             'status' => 'status',
+            'images' => 'gambar',
+            'images.*' => 'gambar',
         ];
     }
 }

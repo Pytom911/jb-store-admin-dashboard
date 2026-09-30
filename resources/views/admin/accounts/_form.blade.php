@@ -1,3 +1,8 @@
+@php
+    $existingImages = $account->exists ? $account->images : collect();
+    $remainingSlots = $account->remainingImageSlots();
+@endphp
+
 <div class="grid gap-5 sm:grid-cols-2">
     <x-form.select
         name="game_id"
@@ -29,22 +34,6 @@
     </div>
 
     <x-form.input
-        name="username"
-        label="Username"
-        :value="$account->username"
-        required
-        autocomplete="off"
-    />
-
-    <x-form.password
-        name="password"
-        label="Password"
-        :value="$account->password"
-        required
-        help="Disimpan terenkripsi di database. Jangan bagikan ke siapa pun selain pembeli."
-    />
-
-    <x-form.input
         name="price"
         label="Harga"
         type="number"
@@ -74,4 +63,58 @@
             placeholder="Detail tambahan, syarat, atau catatan penting."
         />
     </div>
+
+    <div class="sm:col-span-2">
+        <x-form.file
+            name="images[]"
+            id="account-images"
+            label="Gambar Detail"
+            :multiple="true"
+            :help="$remainingSlots > 0
+                ? "Pilih beberapa gambar sekaligus, maksimal {$remainingSlots} lagi. Format JPG, PNG, atau WEBP, maksimal 2 MB per file."
+                : 'Kuota gambar sudah penuh. Hapus gambar lama dari halaman detail akun untuk menambah yang baru.'"
+        />
+
+        @if ($remainingSlots > 0 && $existingImages->isEmpty())
+            <label class="mt-3 flex items-start gap-2.5 text-sm text-slate-600">
+                <input
+                    type="checkbox"
+                    name="cover_first"
+                    value="1"
+                    class="mt-0.5 h-4 w-4 shrink-0 rounded border-slate-300 text-indigo-600 focus:ring-indigo-500/20"
+                />
+                <span>Jadikan gambar pertama sebagai sampul akun ini.</span>
+            </label>
+        @elseif ($remainingSlots > 0)
+            <p class="mt-3 text-xs text-slate-500">
+                Sampul sudah ada, jadi gambar baru ini tidak akan menggantikannya. Ubah sampul dari halaman detail akun.
+            </p>
+        @endif
+    </div>
 </div>
+
+@if ($existingImages->isNotEmpty())
+    <div class="mt-6">
+        <p class="text-xs font-semibold tracking-wider text-slate-500 uppercase">
+            Gambar saat ini ({{ $existingImages->count() }})
+        </p>
+
+        <ul class="mt-3 flex flex-wrap gap-3">
+            @foreach ($existingImages as $image)
+                <li class="relative">
+                    <img
+                        src="{{ $image->url }}"
+                        alt="Gambar detail {{ $account->account_code }}"
+                        class="h-20 w-20 rounded-lg object-cover ring-1 ring-slate-200"
+                    />
+
+                    @if ($image->is_cover)
+                        <span class="absolute -top-1.5 -left-1.5 rounded bg-indigo-600 px-1.5 py-0.5 text-[10px] font-semibold text-white">
+                            Sampul
+                        </span>
+                    @endif
+                </li>
+            @endforeach
+        </ul>
+    </div>
+@endif

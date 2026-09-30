@@ -25,15 +25,13 @@ class HomeController extends Controller
                 ->limit(6)
                 ->get(),
             'latestAccounts' => Account::query()
-                ->withoutCredentials()
-                ->with('game:id,name,slug,image')
+                ->with(['game:id,name,slug,image', 'coverImage'])
                 ->latest()
                 ->limit(8)
                 ->get(),
             'availableAccounts' => Account::query()
-                ->withoutCredentials()
                 ->available()
-                ->with('game:id,name,slug,image')
+                ->with(['game:id,name,slug,image', 'coverImage'])
                 ->sorted('price_asc')
                 ->limit(8)
                 ->get(),

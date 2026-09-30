@@ -8,6 +8,7 @@ use App\Http\Requests\Admin\StoreAccountRequest;
 use App\Http\Requests\Admin\UpdateAccountRequest;
 use App\Models\Account;
 use App\Models\Game;
+use App\Services\AccountImageService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Collection;
@@ -15,6 +16,8 @@ use Illuminate\View\View;
 
 class AccountController extends Controller
 {
+    public function __construct(private readonly AccountImageService $images) {}
+
     public function index(Request $request): View
     {
         $search = $request->string('search')->trim()->value();
@@ -25,7 +28,8 @@ class AccountController extends Controller
             : null;
 
         $accounts = Account::query()
-            ->with('game:id,name,slug')
+            ->with(['game:id,name,slug', 'coverImage'])
+            ->withImageCount()
             ->search($search)
             ->when(in_array($status, AccountStatus::values(), true), fn ($query) => $query->where('status', $status))
             ->when($gameId, fn ($query) => $query->where('game_id', $gameId))
@@ -53,7 +57,9 @@ class AccountController extends Controller
 
     public function store(StoreAccountRequest $request): RedirectResponse
     {
-        $account = Account::create($request->validated());
+        $account = Account::create($request->safe()->except('images', 'cover_first'));
+
+        $this->images->storeMany($account, $request->file('images', []), $request->boolean('cover_first'));
 
         return redirect()
             ->route('admin.accounts.index')
@@ -63,21 +69,23 @@ class AccountController extends Controller
     public function show(Account $account): View
     {
         return view('admin.accounts.show', [
-            'account' => $account->load('game'),
+            'account' => $account->load('game', 'images'),
         ]);
     }
 
     public function edit(Account $account): View
     {
         return view('admin.accounts.edit', [
-            'account' => $account->load('game'),
+            'account' => $account->load('game', 'images'),
             'games' => $this->gamesForSelect(),
         ]);
     }
 
     public function update(UpdateAccountRequest $request, Account $account): RedirectResponse
     {
-        $account->update($request->validated());
+        $account->update($request->safe()->except('images', 'cover_first'));
+
+        $this->images->storeMany($account, $request->file('images', []), $request->boolean('cover_first'));
 
         return redirect()
             ->route('admin.accounts.index')
@@ -87,6 +95,8 @@ class AccountController extends Controller
     public function destroy(Account $account): RedirectResponse
     {
         $code = $account->account_code;
+
+        $this->images->deleteAll($account);
 
         $account->delete();
 

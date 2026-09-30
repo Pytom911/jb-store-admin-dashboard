@@ -27,6 +27,8 @@ class WiringTest extends TestCase
             ['get', '/admin/accounts/1/edit'],
             ['put', '/admin/accounts/1'],
             ['delete', '/admin/accounts/1'],
+            ['patch', '/admin/accounts/1/images/1'],
+            ['delete', '/admin/accounts/1/images/1'],
             ['get', '/admin/settings'],
             ['put', '/admin/settings'],
         ];
@@ -42,6 +44,19 @@ class WiringTest extends TestCase
 
         $this->get('/admin')->assertForbidden();
         $this->get('/admin/accounts')->assertForbidden();
+    }
+
+    public function test_account_image_routes_are_admin_only(): void
+    {
+        $account = Account::factory()->create();
+        $image = $account->images()->create(['path' => 'accounts/a.jpg', 'is_cover' => true]);
+
+        $this->actingAs(User::factory()->create(['role' => 'customer']));
+
+        $this->patch("/admin/accounts/{$account->id}/images/{$image->id}")->assertForbidden();
+        $this->delete("/admin/accounts/{$account->id}/images/{$image->id}")->assertForbidden();
+
+        $this->assertTrue($image->fresh()->is_cover);
     }
 
     public function test_authenticated_admins_pass_the_middleware(): void
@@ -120,11 +135,9 @@ class WiringTest extends TestCase
             'account_code' => 'ml 001',
             'game_id' => 999,
             'title' => '',
-            'username' => '',
-            'password' => '',
             'price' => 'abc',
             'status' => 'pending',
-        ])->assertSessionHasErrors(['account_code', 'game_id', 'title', 'username', 'password', 'price', 'status']);
+        ])->assertSessionHasErrors(['account_code', 'game_id', 'title', 'price', 'status']);
 
         $this->assertSame(0, Account::query()->count());
     }
@@ -138,8 +151,6 @@ class WiringTest extends TestCase
             'game_id' => $game->id,
             'account_code' => ' ml-001 ',
             'title' => 'Akun Sultan',
-            'username' => 'user',
-            'password' => 'secret',
             'price' => 150000,
             'status' => 'available',
         ]);

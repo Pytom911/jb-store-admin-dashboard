@@ -175,35 +175,22 @@ const MARQUEE_MAX_SETS = 24;
 document.querySelectorAll('[data-game-marquee]').forEach((frame) => {
     const track = frame.querySelector('[data-game-marquee-track]');
     const set = frame.querySelector('[data-game-marquee-set]');
-    const toggle = frame.parentElement?.querySelector('[data-game-marquee-toggle]');
 
     if (!track || !set) return;
 
     const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
     const clones = [];
-    let userPaused = false;
     let focusInside = false;
     let onScreen = true;
 
     const syncPaused = () => {
-        // Any one of these holds the position. They never stack into a visible
-        // stop on their own: only the toggle and the keyboard focus the user.
-        const paused = userPaused || focusInside || ! onScreen;
+        const paused = focusInside || ! onScreen;
 
         if (paused) {
             frame.dataset.paused = 'true';
         } else {
             delete frame.dataset.paused;
         }
-
-        if (! toggle) return;
-
-        toggle.setAttribute('aria-pressed', String(userPaused));
-        toggle.querySelector('[data-marquee-toggle-label]').textContent = userPaused
-            ? 'Lanjutkan kartu game'
-            : 'Jedaikan kartu game';
-        toggle.querySelector('[data-marquee-icon="pause"]').classList.toggle('hidden', userPaused);
-        toggle.querySelector('[data-marquee-icon="play"]').classList.toggle('hidden', ! userPaused);
     };
 
     const measure = () => {
@@ -252,15 +239,6 @@ document.querySelectorAll('[data-game-marquee]').forEach((frame) => {
         measure();
     };
 
-    toggle?.addEventListener('click', () => {
-        userPaused = ! userPaused;
-        syncPaused();
-    });
-
-    // Tabbing into a card inside an overflow-hidden track makes the browser
-    // scroll that track to reveal the focus, which would knock the loop out of
-    // alignment. Holding position while focus is inside keeps the two from
-    // fighting; it is a user-driven stop, not an automatic one.
     frame.addEventListener('focusin', () => {
         focusInside = true;
         syncPaused();

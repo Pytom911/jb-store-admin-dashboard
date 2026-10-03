@@ -52,7 +52,7 @@
         @if ($linkLabel && $linkHref)
             <a
                 href="{{ $linkHref }}"
-                class="inline-flex shrink-0 items-center gap-2 self-start rounded-full bg-surface px-4 py-2 text-sm font-semibold ring-1 ring-inset ring-current transition-colors {{ $palette['text'] }} {{ $palette['hover'] }} hover:text-white focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent sm:self-auto"
+                class="inline-flex min-h-11 shrink-0 items-center gap-2 self-start rounded-full bg-surface px-4 py-2 text-sm font-semibold ring-1 ring-inset ring-current transition-colors {{ $palette['text'] }} {{ $palette['hover'] }} hover:text-white focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent sm:min-h-9 sm:self-auto"
             >
                 {{ $linkLabel }}
 

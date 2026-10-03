@@ -13,7 +13,7 @@
     {{-- ============================ HERO ============================ --}}
     <section class="hero-wash border-b border-rule">
         <div
-            class="mx-auto grid max-w-7xl items-center gap-10 px-4 py-12 sm:px-6 sm:py-16 xl:grid-cols-12 xl:gap-14 xl:px-8 xl:py-20">
+            class="mx-auto grid max-w-7xl grid-cols-1 items-center gap-10 px-4 py-12 sm:px-6 sm:py-16 xl:grid-cols-12 xl:gap-14 xl:px-8 xl:py-20">
             <div class="xl:col-span-5">
 
                 <h1
@@ -44,7 +44,7 @@
                 </div>
             </div>
 
-            <div class="xl:col-span-7">
+            <div class="min-w-0 xl:col-span-7">
                 @if ($games->isNotEmpty())
                     {{--
                         One set only. The driver in app.js repeats it until two
@@ -65,30 +65,6 @@
                                     @endforeach
                                 </div>
                             </div>
-                        </div>
-
-                        {{--
-                            WCAG 2.2.2 wants a user-controlled pause on motion
-                            that runs past five seconds. It never engages on its
-                            own: nothing stops the marquee for hover, scroll or
-                            reaching the end of the loop.
-                        --}}
-                        {{-- <button type="button" data-game-marquee-toggle aria-pressed="false"
-                            class="absolute top-0 right-0 z-10 inline-flex h-9 w-9 items-center justify-center rounded-full bg-surface/90 text-ink-soft ring-1 ring-inset ring-rule backdrop-blur-sm transition-colors hover:text-accent focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent">
-                            <span class="sr-only" data-marquee-toggle-label>Jedaikan kartu game</span>
-
-                            <svg class="h-4 w-4" data-marquee-icon="pause" viewBox="0 0 24 24" fill="currentColor"
-                                aria-hidden="true">
-                                <path
-                                    d="M8 5.25A.75.75 0 0 1 8.75 4.5h1.5a.75.75 0 0 1 .75.75v13.5a.75.75 0 0 1-.75.75h-1.5A.75.75 0 0 1 8 18.75V5.25Zm6 0A.75.75 0 0 1 14.75 4.5h1.5a.75.75 0 0 1 .75.75v13.5a.75.75 0 0 1-.75.75h-1.5a.75.75 0 0 1-.75-.75V5.25Z" />
-                            </svg>
-
-                            <svg class="hidden h-4 w-4" data-marquee-icon="play" viewBox="0 0 24 24" fill="currentColor"
-                                aria-hidden="true">
-                                <path
-                                    d="M4.5 5.653c0-1.426 1.529-2.33 2.779-1.643l11.54 6.348c1.295.712 1.295 2.573 0 3.285L7.28 19.99c-1.25.687-2.779-.217-2.779-1.643V5.653Z" />
-                            </svg>
-                        </button> --}}
                     </div>
                 @else
                     <div
@@ -142,37 +118,6 @@
                 </x-alert>
             </div>
         </div>
-    @endif
-
-    {{-- ========================= PILIH GAME ========================= --}}
-    @if ($games->isNotEmpty())
-        <section class="border-b border-rule py-14 sm:py-16">
-            <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-                @include('public.partials.section-head', [
-                    'eyebrow' => 'Etalase',
-                    'accent' => 'mid',
-                    'title' => 'Pilih Game',
-                    'deck' =>
-                        $games->count() >= 6
-                            ? 'Enam game paling ramai etalasenya. Gulir ke samping untuk lihat yang lain.'
-                            : 'Game yang tersedia di etalase kami.',
-                    'linkLabel' => 'Semua game',
-                    'linkHref' => route('games.index'),
-                ])
-            </div>
-
-            {{-- Keyboard-scrollable: the region needs a tab stop and a name before
-                 arrow keys reach it. Padding leaves the hover shadow room
-                 inside the scroll container instead of letting it clip. --}}
-            <div class="hide-scrollbar mt-6 overflow-x-auto overscroll-x-contain" tabindex="0" role="region"
-                aria-label="Daftar game, gulir ke samping">
-                <div class="mx-auto flex max-w-7xl snap-x snap-mandatory gap-4 px-4 py-5 sm:gap-5 sm:px-6 lg:px-8">
-                    @foreach ($games as $game)
-                        @include('public.partials.game-tile', ['game' => $game])
-                    @endforeach
-                </div>
-            </div>
-        </section>
     @endif
 
     {{-- ======================== STOK TERBARU ======================== --}}

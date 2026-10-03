@@ -297,23 +297,25 @@ class PublicPagesTest extends TestCase
         // still never shows blank paper without the server shipping duplicates.
         $this->assertSame(1, substr_count($html, 'data-game-marquee-set'));
 
-        // Twice in total: the hero set, then the "Pilih Game" strip below.
-        $this->assertSame(2, substr_count($html, route('games.show', $game)));
+        // Once in the hero set.
+        $this->assertSame(1, substr_count($html, route('games.show', $game)));
     }
 
-    public function test_the_home_hero_marquee_ships_a_pause_control_and_no_stepped_scroll(): void
+    public function test_the_home_hero_marquee_has_no_stepped_scroll(): void
     {
         Game::factory()->count(3)->create();
 
         $html = $this->get('/')->assertOk()->getContent();
 
-        // WCAG 2.2.2 wants a user-controlled stop on motion that runs past five
-        // seconds, and the loop must stay one uninterrupted CSS animation. A
-        // stepped scroll carousel is what produced the visible pause and jump,
-        // so guard against it coming back.
-        $this->assertStringContainsString('data-game-marquee-toggle', $html);
         $this->assertStringNotContainsString('data-carousel', $html);
         $this->assertStringNotContainsString('setInterval', $html);
+    }
+
+    public function test_the_home_hero_grid_declares_grid_cols_1_for_mobile_layout(): void
+    {
+        $html = $this->get('/')->assertOk()->getContent();
+
+        $this->assertStringContainsString('grid-cols-1', $html);
     }
 
     public function test_a_low_stock_warning_appears_on_the_homepage(): void

@@ -42,7 +42,7 @@
             <div class="mx-auto flex h-16 max-w-7xl items-center gap-4 px-4 pt-[env(safe-area-inset-top)] sm:px-6 lg:h-20 lg:px-8">
                 <a
                     href="{{ route('home') }}"
-                    class="-ml-1 flex shrink-0 items-center gap-2.5 rounded-xl focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-accent"
+                    class="-ml-1 flex min-h-11 shrink-0 items-center gap-2.5 rounded-xl focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-accent sm:min-h-9"
                 >
                     <span
                         class="flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br from-accent-deep via-accent to-accent-bright font-display text-base font-bold text-white"
@@ -84,7 +84,7 @@
                         target="_blank"
                         rel="noopener noreferrer"
                         aria-label="Chat {{ $whatsappNumber }} lewat WhatsApp"
-                        class="inline-flex items-center gap-2 rounded-full bg-wa px-3.5 py-2 text-sm font-semibold text-white transition-[filter] hover:brightness-110 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent"
+                        class="inline-flex min-h-11 items-center gap-2 rounded-full bg-wa px-3.5 py-2 text-sm font-semibold text-white transition-[filter] hover:brightness-110 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent sm:min-h-9"
                     >
                         <svg class="h-4 w-4 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
                             <path stroke-linecap="round" stroke-linejoin="round" d="M8.625 12a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Z" />
@@ -102,7 +102,7 @@
                         aria-label="Buka menu navigasi"
                         aria-expanded="false"
                         aria-controls="site-drawer"
-                        class="-mr-2 rounded-xl p-2 text-ink transition-colors hover:bg-accent-soft hover:text-accent focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent lg:hidden"
+                        class="-mr-2 flex min-h-11 min-w-11 items-center justify-center rounded-xl p-2 text-ink transition-colors hover:bg-accent-soft hover:text-accent focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent lg:hidden"
                     >
                         <svg class="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
                             <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5" />
@@ -144,7 +144,7 @@
                         data-drawer-toggle
                         type="button"
                         aria-label="Tutup menu navigasi"
-                        class="-mr-2 rounded-xl p-2 text-ink-soft transition-colors hover:bg-accent-soft hover:text-accent focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent"
+                        class="-mr-2 inline-flex min-h-11 min-w-11 items-center justify-center rounded-xl p-2 text-ink-soft transition-colors hover:bg-accent-soft hover:text-accent focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent"
                     >
                         <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
                             <path stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12" />
@@ -193,7 +193,7 @@
                         <div class="flex items-baseline justify-between gap-3">
                             <dt class="text-ink-soft">Nomor</dt>
                             <dd>
-                                <a class="font-medium text-ink transition-colors hover:text-accent" href="{{ $whatsappUrl }}" target="_blank" rel="noopener noreferrer">{{ $whatsappNumber }}</a>
+                                <a class="inline-block py-2 font-medium text-ink transition-colors hover:text-accent" href="{{ $whatsappUrl }}" target="_blank" rel="noopener noreferrer">{{ $whatsappNumber }}</a>
                             </dd>
                         </div>
 
@@ -206,7 +206,7 @@
 
                 <a
                     href="{{ route('login') }}"
-                    class="mt-auto border-t border-rule px-5 py-4 pb-[calc(env(safe-area-inset-bottom)+1rem)] text-sm font-semibold text-ink-soft transition-colors hover:bg-accent-soft hover:text-accent"
+                    class="mt-auto inline-flex min-h-11 items-center border-t border-rule px-5 py-4 pb-[calc(env(safe-area-inset-bottom)+1rem)] text-sm font-semibold text-ink-soft transition-colors hover:bg-accent-soft hover:text-accent"
                 >
                     Masuk ke panel admin
                 </a>

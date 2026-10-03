@@ -91,7 +91,7 @@
                     Dilayani setiap hari, 09.00 &ndash; 21.00 WIB.
                 </p>
 
-                <a href="{{ route('login') }}" class="mt-2 inline-block rounded text-sm font-semibold text-white/75 transition-colors hover:text-white">
+                <a href="{{ route('login') }}" class="mt-2 inline-flex min-h-11 items-center rounded text-sm font-semibold text-white/75 transition-colors hover:text-white">
                     Masuk ke panel admin
                 </a>
             </div>

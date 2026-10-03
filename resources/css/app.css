@@ -167,15 +167,7 @@
         background-image: radial-gradient(120% 78% at 50% -12%, color-mix(in srgb, var(--color-accent) 9%, transparent), transparent 72%);
     }
 
-    /* Horizontal rails hide their scrollbar: the cards are the affordance, and
-       padding around them keeps the hover shadow off the clip edge. */
-    .hide-scrollbar {
-        scrollbar-width: none;
-    }
 
-    .hide-scrollbar::-webkit-scrollbar {
-        display: none;
-    }
 }
 
 /*

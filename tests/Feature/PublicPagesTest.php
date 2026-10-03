@@ -244,30 +244,76 @@ class PublicPagesTest extends TestCase
         $this->get('/games')->assertOk()->assertSee('Z');
     }
 
-    public function test_the_home_hero_falls_back_when_no_game_has_a_cover(): void
+    public function test_the_home_hero_falls_back_to_the_gradient_panel_without_games(): void
     {
-        Game::factory()->count(3)->create();
-
-        // No factory game carries a cover, so the collage collapses to the
-        // gradient panel. A hole in the grid is worse than no collage at all.
+        // Nothing to slide, so the marquee slot becomes the branded panel
+        // instead of an empty frame the driver would have to measure its way out
+        // of.
         $this->get('/')
             ->assertOk()
-            ->assertSee('Cover game belum diunggah')
-            ->assertDontSee('<img', escape: false);
+            ->assertSee('Belum ada game di etalase')
+            ->assertDontSee('data-game-marquee', escape: false);
     }
 
-    public function test_the_home_hero_collapses_gracefully_for_a_partial_set_of_covers(): void
+    public function test_the_home_hero_marquee_renders_one_set_covering_every_game(): void
     {
         Storage::fake('public');
 
-        $withCover = Game::factory()->create(['name' => 'Punya Sampul']);
-        Game::factory()->create(['name' => 'Tanpa Sampul']);
-        $withCover->update(['image' => UploadedFile::fake()->create('cover.jpg', 64, 'image/jpeg')->store('games', 'public')]);
+        $games = Game::factory()->count(5)->create();
+        $games->first()->update([
+            'image' => UploadedFile::fake()->create('cover.jpg', 64, 'image/jpeg')->store('games', 'public'),
+        ]);
 
-        $this->get('/')
+        $html = $this->get('/')
             ->assertOk()
-            ->assertSee($withCover->refresh()->image_url, false)
-            ->assertDontSee('Cover game belum diunggah');
+            ->assertSee($games->first()->refresh()->image_url, false)
+            ->assertDontSee('Belum ada game di etalase')
+            ->getContent();
+
+        // Exactly one set, because the loop has to travel exactly one set width
+        // to stay seamless. Repeating the list in Blade would ship every game
+        // twice and double that distance.
+        $this->assertSame(1, substr_count($html, 'data-game-marquee-set'));
+        $this->assertSame(1, substr_count($html, 'data-game-marquee-track'));
+
+        // Cover-less games fall back to their initial, so the set keeps one
+        // tile per game rather than thinning out.
+        foreach ($games as $game) {
+            $this->assertStringContainsString(route('games.show', $game), $html);
+        }
+    }
+
+    public function test_the_home_hero_marquee_renders_for_a_single_game(): void
+    {
+        $game = Game::factory()->create(['name' => 'Satu Game Saja']);
+
+        $html = $this->get('/')
+            ->assertOk()
+            ->assertSee('Satu Game Saja')
+            ->getContent();
+
+        // One set, and the game links once inside it. The driver repeats the set
+        // in the browser until two sets span the frame, so a one-game storefront
+        // still never shows blank paper without the server shipping duplicates.
+        $this->assertSame(1, substr_count($html, 'data-game-marquee-set'));
+
+        // Twice in total: the hero set, then the "Pilih Game" strip below.
+        $this->assertSame(2, substr_count($html, route('games.show', $game)));
+    }
+
+    public function test_the_home_hero_marquee_ships_a_pause_control_and_no_stepped_scroll(): void
+    {
+        Game::factory()->count(3)->create();
+
+        $html = $this->get('/')->assertOk()->getContent();
+
+        // WCAG 2.2.2 wants a user-controlled stop on motion that runs past five
+        // seconds, and the loop must stay one uninterrupted CSS animation. A
+        // stepped scroll carousel is what produced the visible pause and jump,
+        // so guard against it coming back.
+        $this->assertStringContainsString('data-game-marquee-toggle', $html);
+        $this->assertStringNotContainsString('data-carousel', $html);
+        $this->assertStringNotContainsString('setInterval', $html);
     }
 
     public function test_a_low_stock_warning_appears_on_the_homepage(): void

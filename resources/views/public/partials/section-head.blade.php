@@ -10,17 +10,17 @@
 @php
     /*
      * Each section carries one accent so the long single-column page reads as a
-     * sequence of distinct bands. The classes are spelled out in full because
-     * Tailwind scans source text for literal class names and would never emit a
-     * utility assembled from an interpolated string.
+     * sequence of distinct bands. Every entry is a step on the blue ramp rather
+     * than a separate hue, so the bands stay distinguishable without the page
+     * drifting off its single identity colour. The classes are spelled out in
+     * full because Tailwind scans source text for literal class names and would
+     * never emit a utility assembled from an interpolated string.
      */
     $accents = [
+        'deep' => ['text' => 'text-accent-deepest', 'fill' => 'bg-accent-deepest'],
+        'deep-mid' => ['text' => 'text-accent-deep', 'fill' => 'bg-accent-deep'],
         'accent' => ['text' => 'text-accent', 'fill' => 'bg-accent'],
-        'cyan' => ['text' => 'text-pop-cyan', 'fill' => 'bg-pop-cyan'],
-        'lime' => ['text' => 'text-pop-lime', 'fill' => 'bg-pop-lime'],
-        'magenta' => ['text' => 'text-pop-magenta', 'fill' => 'bg-pop-magenta'],
-        'tangerine' => ['text' => 'text-pop-tangerine', 'fill' => 'bg-pop-tangerine'],
-        'wa' => ['text' => 'text-wa', 'fill' => 'bg-wa'],
+        'mid' => ['text' => 'text-accent-bright', 'fill' => 'bg-accent-bright'],
     ];
 
     $palette = $accents[$accent] ?? $accents['accent'];

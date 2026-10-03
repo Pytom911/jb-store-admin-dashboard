@@ -19,7 +19,7 @@
             />
         @else
             <span
-                class="flex h-full w-full items-center justify-center bg-gradient-to-br from-accent-soft via-surface to-pop-cyan/10 font-display text-5xl font-bold text-accent/45"
+                class="flex h-full w-full items-center justify-center bg-gradient-to-br from-accent-soft via-surface to-accent-bright/15 font-display text-5xl font-bold text-accent/45"
                 aria-hidden="true"
             >
                 {{ strtoupper(mb_substr($game->name, 0, 1)) }}
@@ -27,7 +27,7 @@
         @endif
 
         @if ($stock > 0)
-            <span class="absolute top-3 left-3 inline-flex items-center gap-1.5 rounded-full bg-pop-lime px-2.5 py-1 text-xs font-semibold text-white tabular-nums shadow-sm">
+            <span class="absolute top-3 left-3 inline-flex items-center gap-1.5 rounded-full bg-accent px-2.5 py-1 text-xs font-semibold text-white tabular-nums shadow-sm ring-1 ring-inset ring-white/25">
                 <span class="h-1.5 w-1.5 rounded-full bg-white" aria-hidden="true"></span>
                 {{ $stock }} tersedia
             </span>
@@ -51,7 +51,7 @@
 
         <p @class([
             'mt-auto pt-5 text-sm font-semibold',
-            'text-wa' => $stock > 0,
+            'text-accent' => $stock > 0,
             'text-ink-soft' => $stock === 0,
         ])>
             @if ($stock > 0)

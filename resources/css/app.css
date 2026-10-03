@@ -15,21 +15,37 @@
         'Segoe UI Symbol', 'Noto Color Emoji';
     --font-display: 'Archivo', 'Instrument Sans', ui-sans-serif, system-ui, sans-serif;
 
-    --color-paper: #f4f3ff;
+    --color-paper: #f0f9ff;
     --color-surface: #ffffff;
-    --color-surface-2: #fbfaff;
-    --color-ink: #141326;
-    --color-ink-soft: #55536e;
-    --color-rule: #e3e0f7;
-    --color-accent: #5b2ae0;
-    --color-accent-soft: #ede9fe;
-    --color-wa: #0a7a3e;
+    --color-surface-2: #f8fafc;
+    --color-ink: #0f172a;
+    --color-ink-soft: #475569;
+    --color-rule: #e2e8f0;
+    --color-accent: #2563eb;
+    --color-accent-soft: #dbeafe;
+    --color-wa: #16a34a;
 
-    /* Section accents. Each holds white text at 5:1 or better. */
-    --color-pop-cyan: #0e7490;
-    --color-pop-lime: #4d7c0f;
-    --color-pop-magenta: #be185d;
-    --color-pop-tangerine: #c2410c;
+    /*
+     * Blue ramp for gradients. `accent` alone cannot carry a gradient, so the
+     * hero, header hairline and the brand marks run deep -> accent -> bright.
+     * Every step here is a blue, so no gradient on the storefront can drift off
+     * the single identity colour.
+     */
+    --color-accent-deepest: #1e3a8a;
+    --color-accent-deep: #1e40af;
+    --color-accent-bright: #3b82f6;
+
+    /*
+     * Semantic status colours, not brand accents. `pop-lime` and
+     * `pop-tangerine` encode account state (available / reserved) and notice
+     * tone (success / warning) for shoppers who scan for green-means-in-stock,
+     * so they deliberately sit outside the all-blue chrome above. Green as the
+     * site's primary colour is still off limits; this is the one exception.
+     */
+    --color-pop-cyan: #0284c7;
+    --color-pop-lime: #16a34a;
+    --color-pop-magenta: #4f46e5;
+    --color-pop-tangerine: #ea580c;
     --color-pop-slate: #64748b;
 
     /*
@@ -39,15 +55,15 @@
      * admin panel and the login screen fall back to the slate/indigo scheme
      * they already use via .theme-slate below.
      */
-    --color-fg: #141326;
-    --color-fg-soft: #55536e;
-    --color-line: #e3e0f7;
-    --color-brand: #5b2ae0;
-    --color-brand-soft: #ede9fe;
+    --color-fg: #0f172a;
+    --color-fg-soft: #475569;
+    --color-line: #e2e8f0;
+    --color-brand: #2563eb;
+    --color-brand-soft: #dbeafe;
     --color-danger: #dc2626;
     --color-field: #ffffff;
-    --color-field-line: #cdc9ea;
-    --color-field-placeholder: #6b6890;
+    --color-field-line: #cbd5e1;
+    --color-field-placeholder: #64748b;
 }
 
 @layer base {
@@ -55,8 +71,8 @@
         --color-fg: #0f172a;
         --color-fg-soft: #475569;
         --color-line: #cbd5e1;
-        --color-brand: #4f46e5;
-        --color-brand-soft: #eef2ff;
+        --color-brand: #2563eb;
+        --color-brand-soft: #eff6ff;
         --color-danger: #dc2626;
         --color-field: #ffffff;
         --color-field-line: #cbd5e1;
@@ -100,17 +116,136 @@
     .pop-wash-cool {
         background-image:
             radial-gradient(60rem 32rem at 12% -10%, color-mix(in srgb, var(--color-accent) 16%, transparent), transparent 70%),
-            radial-gradient(44rem 26rem at 92% 8%, color-mix(in srgb, var(--color-pop-cyan) 14%, transparent), transparent 70%);
+            radial-gradient(44rem 26rem at 92% 8%, color-mix(in srgb, var(--color-accent-deep) 14%, transparent), transparent 70%);
     }
 
-    .pop-wash-warm {
+    /* Alternating band, so the long page still reads as a sequence of sections
+       without leaving the blue identity. */
+    .pop-wash-alt {
         background-image:
-            radial-gradient(48rem 28rem at 8% 0%, color-mix(in srgb, var(--color-pop-magenta) 12%, transparent), transparent 70%),
-            radial-gradient(40rem 24rem at 95% 20%, color-mix(in srgb, var(--color-pop-tangerine) 12%, transparent), transparent 70%);
+            radial-gradient(48rem 28rem at 8% 0%, color-mix(in srgb, var(--color-accent-deep) 12%, transparent), transparent 70%),
+            radial-gradient(40rem 24rem at 95% 20%, color-mix(in srgb, var(--color-accent-bright) 12%, transparent), transparent 70%);
     }
 
-    .pop-wash-lime {
-        background-image: radial-gradient(52rem 26rem at 50% -20%, color-mix(in srgb, var(--color-pop-lime) 14%, transparent), transparent 70%);
+    /* Soft top-down wash so the hero is not a flat paper field. */
+    .hero-wash {
+        background-color: var(--color-paper);
+        background-image:
+            radial-gradient(120% 78% at 50% -12%, color-mix(in srgb, var(--color-accent) 11%, var(--color-paper)), transparent 72%),
+            linear-gradient(to bottom, var(--color-surface-2), var(--color-paper) 62%);
+    }
+
+    /* Horizontal rails hide their scrollbar: the cards are the affordance, and
+       padding around them keeps the hover shadow off the clip edge. */
+    .hide-scrollbar {
+        scrollbar-width: none;
+    }
+
+    .hide-scrollbar::-webkit-scrollbar {
+        display: none;
+    }
+}
+
+/*
+ * Seamless game marquee.
+ *
+ * The loop is exact rather than approximate: one set is measured, the track is
+ * translated left by precisely that width, and the animation repeats. Because
+ * the set carries its own trailing gap as padding (not as a gap between sets),
+ * set N+1 lands pixel-identical to where set N started. No seam, no empty strip
+ * at the wrap point, and `linear` timing keeps the speed identical for every
+ * card at every breakpoint.
+ *
+ * The distance is a registered custom property rather than a baked-in px value
+ * so the keyframe can interpolate to it and JS can re-point a running animation
+ * when the card width changes at a breakpoint.
+ */
+@property --game-marquee-shift {
+    syntax: '<length>';
+    inherits: true;
+    initial-value: 0px;
+}
+
+@keyframes game-marquee-scroll {
+    from {
+        transform: translate3d(0, 0, 0);
+    }
+
+    to {
+        transform: translate3d(calc(-1 * var(--game-marquee-shift)), 0, 0);
+    }
+}
+
+.game-marquee {
+    overflow: hidden;
+
+    /* Cards fade out at both edges rather than being sliced off, which also
+       hides the handover from one set to the next. */
+    mask-image: linear-gradient(
+        to right,
+        transparent,
+        #000 2.5rem,
+        #000 calc(100% - 2.5rem),
+        transparent
+    );
+}
+
+.game-marquee__track {
+    display: flex;
+    width: max-content;
+    will-change: transform;
+    animation: game-marquee-scroll var(--game-marquee-duration, 60s) linear infinite;
+}
+
+.game-marquee__set {
+    display: flex;
+    flex: 0 0 auto;
+    gap: var(--game-marquee-gap, 1rem);
+
+    /* Must stay equal to the gap above. The measured set width feeds the loop
+       distance, so a gap living outside the set would subtract a hole from
+       every wrap. */
+    padding-right: var(--game-marquee-gap, 1rem);
+}
+
+/*
+ * Paused by the toggle button, by keyboard focus, and while the hero is off
+ * screen. `animation-play-state` holds the current position, so none of these
+ * can introduce a jump.
+ */
+.game-marquee[data-paused='true'] .game-marquee__track {
+    animation-play-state: paused;
+}
+
+/*
+ * Reduced motion: the track stops dead on the first set. JS skips cloning and
+ * adds this modifier, which turns the frame into an ordinary scrollable strip so
+ * the cards are still reachable by touch, keyboard and screen reader. The
+ * trailing set padding is dropped because a static row should not end on a
+ * phantom gap.
+ */
+.game-marquee[data-static='true'] {
+    overflow-x: auto;
+    overscroll-behavior-x: contain;
+    scrollbar-width: none;
+    mask-image: none;
+}
+
+.game-marquee[data-static='true']::-webkit-scrollbar {
+    display: none;
+}
+
+.game-marquee[data-static='true'] .game-marquee__track {
+    animation: none;
+}
+
+.game-marquee[data-static='true'] .game-marquee__set:last-child {
+    padding-right: 0;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .game-marquee__track {
+        animation: none;
     }
 }
 

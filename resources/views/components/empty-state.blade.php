@@ -3,7 +3,17 @@
     'description' => null,
     'actionLabel' => null,
     'actionUrl' => null,
+    // The action is a WhatsApp hand-off on the storefront, so the caller opts
+    // into green there. Left as accent, any page whose action is an in-app link
+    // stays on the blue identity.
+    'tone' => 'accent',
 ])
+
+@php
+    $actionTone = $tone === 'wa'
+        ? 'bg-wa focus-visible:outline-wa'
+        : 'bg-accent focus-visible:outline-accent';
+@endphp
 
 <div {{ $attributes->class('rounded-2xl border border-dashed border-rule bg-surface-2 py-16 text-center') }}>
     <span
@@ -25,7 +35,7 @@
     @if ($actionUrl && $actionLabel)
         <a
             href="{{ $actionUrl }}"
-            class="mt-7 inline-flex items-center gap-2 rounded-full bg-accent px-5 py-2.5 text-sm font-semibold text-white transition-[filter] hover:brightness-110 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent"
+            class="mt-7 inline-flex items-center gap-2 rounded-full px-5 py-2.5 text-sm font-semibold text-white transition-[filter] hover:brightness-110 focus-visible:outline-2 focus-visible:outline-offset-2 {{ $actionTone }}"
         >
             {{ $actionLabel }}
         </a>

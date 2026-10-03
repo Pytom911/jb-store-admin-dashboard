@@ -168,3 +168,136 @@ document.addEventListener('click', (event) => {
 
     document.querySelector('main')?.focus();
 });
+
+const MARQUEE_PIXELS_PER_SECOND = 42;
+const MARQUEE_MAX_SETS = 24;
+
+document.querySelectorAll('[data-game-marquee]').forEach((frame) => {
+    const track = frame.querySelector('[data-game-marquee-track]');
+    const set = frame.querySelector('[data-game-marquee-set]');
+    const toggle = frame.parentElement?.querySelector('[data-game-marquee-toggle]');
+
+    if (!track || !set) return;
+
+    const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
+    const clones = [];
+    let userPaused = false;
+    let focusInside = false;
+    let onScreen = true;
+
+    const syncPaused = () => {
+        // Any one of these holds the position. They never stack into a visible
+        // stop on their own: only the toggle and the keyboard focus the user.
+        const paused = userPaused || focusInside || ! onScreen;
+
+        if (paused) {
+            frame.dataset.paused = 'true';
+        } else {
+            delete frame.dataset.paused;
+        }
+
+        if (! toggle) return;
+
+        toggle.setAttribute('aria-pressed', String(userPaused));
+        toggle.querySelector('[data-marquee-toggle-label]').textContent = userPaused
+            ? 'Lanjutkan kartu game'
+            : 'Jedaikan kartu game';
+        toggle.querySelector('[data-marquee-icon="pause"]').classList.toggle('hidden', userPaused);
+        toggle.querySelector('[data-marquee-icon="play"]').classList.toggle('hidden', ! userPaused);
+    };
+
+    const measure = () => {
+        // The set carries its own trailing gap as padding, so this width already
+        // includes the space that follows the last card. Scrolling by exactly
+        // this much lands the next set where this one began, which is why the
+        // wrap leaves neither a seam nor a gap.
+        const distance = set.getBoundingClientRect().width;
+
+        if (! distance) return;
+
+        frame.style.setProperty('--game-marquee-shift', `${distance}px`);
+        frame.style.setProperty('--game-marquee-duration', `${distance / MARQUEE_PIXELS_PER_SECOND}s`);
+    };
+
+    const fill = () => {
+        clones.splice(0).forEach((clone) => clone.remove());
+
+        if (reducedMotion.matches) {
+            frame.dataset.static = 'true';
+
+            return;
+        }
+
+        delete frame.dataset.static;
+
+        // A storefront can hold a single game, and one set is narrower than the
+        // hero column on most screens. Repeat until a second set spans the
+        // frame, so the track can always translate a full set width without
+        // uncovering empty paper.
+        const setWidth = set.getBoundingClientRect().width;
+        let sets = 1;
+
+        while (setWidth && sets < MARQUEE_MAX_SETS && track.scrollWidth < frame.clientWidth + setWidth) {
+            const clone = set.cloneNode(true);
+
+            // Assistive tech and the tab order only ever see the original set.
+            clone.setAttribute('aria-hidden', 'true');
+            clone.querySelectorAll('a, button').forEach((element) => element.setAttribute('tabindex', '-1'));
+
+            track.append(clone);
+            clones.push(clone);
+            sets += 1;
+        }
+
+        measure();
+    };
+
+    toggle?.addEventListener('click', () => {
+        userPaused = ! userPaused;
+        syncPaused();
+    });
+
+    // Tabbing into a card inside an overflow-hidden track makes the browser
+    // scroll that track to reveal the focus, which would knock the loop out of
+    // alignment. Holding position while focus is inside keeps the two from
+    // fighting; it is a user-driven stop, not an automatic one.
+    frame.addEventListener('focusin', () => {
+        focusInside = true;
+        syncPaused();
+    });
+
+    frame.addEventListener('focusout', (event) => {
+        if (frame.contains(event.relatedTarget)) return;
+
+        focusInside = false;
+        syncPaused();
+    });
+
+    // Nothing to animate while the hero is scrolled out of view. Scrolling back
+    // in must not undo a pause the shopper asked for, so this only feeds the
+    // same OR rather than driving it.
+    if ('IntersectionObserver' in window) {
+        new IntersectionObserver(
+            ([entry]) => {
+                onScreen = entry.isIntersecting;
+                syncPaused();
+            },
+            { threshold: 0 },
+        ).observe(frame);
+    }
+
+    reducedMotion.addEventListener('change', fill);
+
+    let resizeFrame = 0;
+
+    window.addEventListener('resize', () => {
+        cancelAnimationFrame(resizeFrame);
+        resizeFrame = requestAnimationFrame(fill);
+    });
+
+    fill();
+
+    // Card width is fixed in CSS, but web fonts can still shift the caption and
+    // change the measured set width after first paint.
+    document.fonts?.ready.then(measure);
+});

@@ -3,9 +3,9 @@
     $whatsappNumber = '+'.config('marketplace.whatsapp_number');
 
     $steps = [
-        ['accent' => 'bg-accent', 'title' => 'Pilih akun', 'body' => 'Pilih di katalog, lalu tekan Pesan.'],
-        ['accent' => 'bg-pop-cyan', 'title' => 'Konfirmasi', 'body' => 'Kode akun terkirim ke admin lewat WhatsApp.'],
-        ['accent' => 'bg-pop-lime', 'title' => 'Transfer', 'body' => 'Data login masuk paling lama 10 menit.'],
+        ['tone' => 'bg-gradient-to-br from-accent-bright to-accent', 'title' => 'Pilih akun', 'body' => 'Pilih di katalog, lalu tekan Pesan.'],
+        ['tone' => 'bg-gradient-to-br from-accent to-accent-deep', 'title' => 'Konfirmasi', 'body' => 'Kode akun terkirim ke admin lewat WhatsApp.'],
+        ['tone' => 'bg-gradient-to-br from-accent-deep to-accent-deepest', 'title' => 'Transfer', 'body' => 'Data login masuk paling lama 10 menit.'],
     ];
 @endphp
 
@@ -18,7 +18,7 @@
                     class="inline-flex items-center gap-3 rounded-xl focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-white"
                 >
                     <span
-                        class="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-accent to-pop-magenta font-display text-lg font-bold text-white"
+                        class="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-accent-deep via-accent to-accent-bright font-display text-lg font-bold text-white"
                     >
                         {{ strtoupper(mb_substr(config('app.name'), 0, 1)) }}
                     </span>
@@ -74,10 +74,7 @@
                     @foreach ($steps as $index => $step)
                         <li class="flex gap-3.5">
                             <span
-                                @class([
-                                    'flex h-7 w-7 shrink-0 items-center justify-center rounded-lg font-display text-xs font-bold text-white',
-                                    $step['accent'],
-                                ])
+                                class="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg font-display text-xs font-bold text-white {{ $step['tone'] }}"
                             >
                                 {{ $index + 1 }}
                             </span>

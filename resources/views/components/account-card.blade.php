@@ -31,7 +31,7 @@
         />
     @else
         <div
-            class="flex aspect-video w-full shrink-0 items-center justify-center bg-gradient-to-br from-accent-soft via-surface to-pop-cyan/10 font-display text-3xl font-bold text-accent/45"
+            class="flex aspect-video w-full shrink-0 items-center justify-center bg-gradient-to-br from-accent-soft via-surface to-accent-bright/15 font-display text-3xl font-bold text-accent/45"
             aria-hidden="true"
         >
             {{ strtoupper(mb_substr($accountGame->name, 0, 1)) }}

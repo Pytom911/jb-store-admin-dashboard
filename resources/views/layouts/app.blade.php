@@ -37,7 +37,7 @@
         <header class="sticky top-0 z-40 border-b border-rule bg-paper/85 backdrop-blur-md">
             {{-- Gradient hairline: the one saturated edge on the chrome, so the
                  header reads as part of the palette rather than a grey bar. --}}
-            <div class="h-1 bg-gradient-to-r from-accent via-pop-magenta to-pop-cyan" aria-hidden="true"></div>
+            <div class="h-1 bg-gradient-to-r from-accent-deepest via-accent to-accent-bright" aria-hidden="true"></div>
 
             <div class="mx-auto flex h-16 max-w-7xl items-center gap-4 px-4 pt-[env(safe-area-inset-top)] sm:px-6 lg:h-20 lg:px-8">
                 <a
@@ -45,7 +45,7 @@
                     class="-ml-1 flex shrink-0 items-center gap-2.5 rounded-xl focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-accent"
                 >
                     <span
-                        class="flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br from-accent to-pop-magenta font-display text-base font-bold text-white"
+                        class="flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br from-accent-deep via-accent to-accent-bright font-display text-base font-bold text-white"
                     >
                         {{ strtoupper(mb_substr(config('app.name'), 0, 1)) }}
                     </span>

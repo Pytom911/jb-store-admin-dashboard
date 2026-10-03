@@ -81,7 +81,7 @@
             <div class="lg:col-span-5 xl:col-span-4">
                 <div class="lg:sticky lg:top-28">
                     @if ($account->isAvailable())
-                        <div class="overflow-hidden rounded-2xl bg-gradient-to-br from-accent to-pop-magenta p-6 text-white">
+                        <div class="overflow-hidden rounded-2xl bg-gradient-to-br from-accent-deep via-accent to-accent-bright p-6 text-white">
                             <h2 class="font-display text-lg font-bold tracking-tight">Beli Akun Ini</h2>
 
                             <p class="mt-3 text-sm leading-relaxed text-white/85">

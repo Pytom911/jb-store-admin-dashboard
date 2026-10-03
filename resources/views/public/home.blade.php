@@ -7,25 +7,12 @@
     @php
         $whatsappUrl = 'https://wa.me/'.config('marketplace.whatsapp_number');
         $whatsappNumber = '+'.config('marketplace.whatsapp_number');
-        $heroCovers = $games->filter(fn ($game) => $game->image_url)->take(4)->values();
-
-        /*
-         * The collage has to look deliberate for 1, 2, 3 and 4 covers. A single
-         * spanning tile plus square tiles only tiles cleanly at 3 and 4, so the
-         * thin cases get their own column count instead of leaving a hole.
-         */
-        $heroLayout = match ($heroCovers->count()) {
-            0 => null,
-            1 => ['cols' => 'grid-cols-1', 'heroSpan' => 'col-span-1 aspect-16/9', 'restSpan' => 'aspect-4/3'],
-            2 => ['cols' => 'grid-cols-2', 'heroSpan' => 'col-span-1 aspect-4/3', 'restSpan' => 'aspect-4/3'],
-            default => ['cols' => 'grid-cols-2', 'heroSpan' => 'col-span-2 aspect-16/9', 'restSpan' => 'aspect-square'],
-        };
     @endphp
 
     {{-- ============================ HERO ============================ --}}
-    <section class="pop-wash-cool border-b border-rule">
-        <div class="mx-auto grid max-w-7xl items-center gap-10 px-4 py-12 sm:px-6 sm:py-16 lg:grid-cols-12 lg:gap-14 lg:px-8 lg:py-20">
-            <div class="lg:col-span-6 xl:col-span-7">
+    <section class="hero-wash border-b border-rule">
+        <div class="mx-auto grid max-w-7xl items-center gap-10 px-4 py-12 sm:px-6 sm:py-16 xl:grid-cols-12 xl:gap-14 xl:px-8 xl:py-20">
+            <div class="xl:col-span-5">
                 <p
                     class="inline-flex items-center gap-2 rounded-full bg-surface px-3.5 py-1.5 text-xs font-semibold text-ink-soft ring-1 ring-inset ring-accent/25"
                 >
@@ -50,7 +37,7 @@
                 <div class="mt-8 flex flex-wrap items-center gap-3">
                     <a
                         href="{{ route('accounts.index') }}"
-                        class="inline-flex items-center gap-2 rounded-full bg-gradient-to-r from-accent to-pop-magenta px-6 py-3.5 text-sm font-semibold text-white shadow-lg shadow-accent/25 transition-[filter] hover:brightness-110 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent"
+                        class="inline-flex items-center gap-2 rounded-full bg-gradient-to-r from-accent-deep via-accent to-accent-bright px-6 py-3.5 text-sm font-semibold text-white shadow-lg shadow-accent/25 transition-[filter] hover:brightness-110 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent"
                     >
                         Lihat katalog akun
 
@@ -63,57 +50,76 @@
                         href="{{ $whatsappUrl }}"
                         target="_blank"
                         rel="noopener noreferrer"
-                        class="inline-flex items-center gap-2 rounded-full bg-surface px-6 py-3.5 text-sm font-semibold text-ink ring-1 ring-inset ring-accent/30 transition-colors hover:bg-accent-soft hover:text-accent focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent"
+                        class="inline-flex items-center gap-2 rounded-full bg-wa px-6 py-3.5 text-sm font-semibold text-white transition-[filter] hover:brightness-110 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-wa"
                     >
                         Tanya stok
                     </a>
                 </div>
             </div>
 
-            {{-- Sampul game. Tetap collage, sekarang dengan stok sebagai pill warna. --}}
-            <div class="lg:col-span-6 xl:col-span-5">
-                @if ($heroLayout)
-                    <div class="grid {{ $heroLayout['cols'] }} gap-3 sm:gap-4">
-                        @foreach ($heroCovers as $index => $cover)
-                            <a
-                                href="{{ route('games.show', $cover) }}"
-                                class="group relative block overflow-hidden rounded-2xl bg-ink/5 ring-1 ring-inset ring-ink/5 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-accent {{ $index === 0 ? $heroLayout['heroSpan'] : $heroLayout['restSpan'] }}"
+            <div class="xl:col-span-7">
+                @if ($games->isNotEmpty())
+                    {{--
+                        One set only. The driver in app.js repeats it until two
+                        sets span the frame, then scrolls by exactly one set
+                        width, so the wrap point is a handover rather than a
+                        reset. Duplicating the loop here instead would ship two
+                        copies of every game to assistive tech.
+                    --}}
+                    <div class="relative">
+                        <div class="game-marquee py-6" data-game-marquee>
+                            <div class="game-marquee__track" data-game-marquee-track>
+                                <div class="game-marquee__set" data-game-marquee-set>
+                                    @foreach ($games as $index => $game)
+                                        @include('public.partials.game-tile', [
+                                            'game' => $game,
+                                            'lazy' => $index > 1,
+                                        ])
+                                    @endforeach
+                                </div>
+                            </div>
+                        </div>
+
+                        {{--
+                            WCAG 2.2.2 wants a user-controlled pause on motion
+                            that runs past five seconds. It never engages on its
+                            own: nothing stops the marquee for hover, scroll or
+                            reaching the end of the loop.
+                        --}}
+                        <button
+                            type="button"
+                            data-game-marquee-toggle
+                            aria-pressed="false"
+                            class="absolute top-0 right-0 z-10 inline-flex h-9 w-9 items-center justify-center rounded-full bg-surface/90 text-ink-soft ring-1 ring-inset ring-rule backdrop-blur-sm transition-colors hover:text-accent focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent"
+                        >
+                            <span class="sr-only" data-marquee-toggle-label>Jedaikan kartu game</span>
+
+                            <svg
+                                class="h-4 w-4"
+                                data-marquee-icon="pause"
+                                viewBox="0 0 24 24"
+                                fill="currentColor"
+                                aria-hidden="true"
                             >
-                                <img
-                                    src="{{ $cover->image_url }}"
-                                    alt="{{ $cover->name }}"
-                                    width="640"
-                                    height="480"
-                                    @if ($index === 0)
-                                        fetchpriority="high"
-                                    @else
-                                        loading="lazy"
-                                        decoding="async"
-                                    @endif
-                                    class="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105 motion-reduce:transition-none motion-reduce:group-hover:scale-100"
-                                />
+                                <path d="M8 5.25A.75.75 0 0 1 8.75 4.5h1.5a.75.75 0 0 1 .75.75v13.5a.75.75 0 0 1-.75.75h-1.5A.75.75 0 0 1 8 18.75V5.25Zm6 0A.75.75 0 0 1 14.75 4.5h1.5a.75.75 0 0 1 .75.75v13.5a.75.75 0 0 1-.75.75h-1.5a.75.75 0 0 1-.75-.75V5.25Z" />
+                            </svg>
 
-                                <span class="absolute inset-x-0 bottom-0 bg-gradient-to-t from-ink/90 via-ink/40 to-transparent px-3 pt-10 pb-3 text-left font-display text-sm font-semibold tracking-tight text-white">
-                                    {{ $cover->name }}
-                                </span>
-
-                                @if (($cover->available_accounts_count ?? 0) > 0)
-                                    <span class="absolute top-3 right-3 rounded-full bg-pop-lime px-2.5 py-1 text-xs font-semibold text-white tabular-nums shadow-sm">
-                                        {{ $cover->available_accounts_count }} tersedia
-                                    </span>
-                                @else
-                                    <span class="absolute top-3 right-3 rounded-full bg-pop-slate px-2.5 py-1 text-xs font-semibold text-white shadow-sm">
-                                        Stok habis
-                                    </span>
-                                @endif
-                            </a>
-                        @endforeach
+                            <svg
+                                class="hidden h-4 w-4"
+                                data-marquee-icon="play"
+                                viewBox="0 0 24 24"
+                                fill="currentColor"
+                                aria-hidden="true"
+                            >
+                                <path d="M4.5 5.653c0-1.426 1.529-2.33 2.779-1.643l11.54 6.348c1.295.712 1.295 2.573 0 3.285L7.28 19.99c-1.25.687-2.779-.217-2.779-1.643V5.653Z" />
+                            </svg>
+                        </button>
                     </div>
                 @else
-                    <div class="flex aspect-16/9 flex-col justify-between rounded-2xl bg-gradient-to-br from-accent to-pop-magenta p-6 text-white">
+                    <div class="flex aspect-16/9 flex-col justify-between rounded-2xl bg-gradient-to-br from-accent-deep via-accent to-accent-bright p-6 text-white">
                         <span class="font-display text-3xl font-bold">{{ config('app.name') }}</span>
                         <p class="text-sm text-white/85">
-                            Cover game belum diunggah. Akun yang tersedia bisa langsung dicek di katalog.
+                            Belum ada game di etalase. Akun yang tersedia bisa langsung dicek di katalog.
                         </p>
                     </div>
                 @endif
@@ -121,22 +127,18 @@
         </div>
     </section>
 
+
     {{-- ====================== JAMINAN / 3 KARTU ====================== --}}
     <section class="border-b border-rule bg-surface">
         <div class="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
             <dl class="grid gap-5 sm:grid-cols-3">
                 @foreach ([
-                    ['accent' => 'pop-lime', 'title' => 'Garansi 7 Hari', 'body' => 'Ada yang tidak sesuai? Dikembalikan dalam seminggu.'],
-                    ['accent' => 'pop-cyan', 'title' => 'Bayar Setelah Konfirmasi', 'body' => 'Cek dulu akunnya di sini, baru transfer.'],
-                    ['accent' => 'pop-magenta', 'title' => 'Dikirim Setelah Transfer', 'body' => 'Data login masuk paling lama 10 menit.'],
+                    ['tone' => 'from-accent-bright to-accent', 'title' => 'Garansi 7 Hari', 'body' => 'Ada yang tidak sesuai? Dikembalikan dalam seminggu.'],
+                    ['tone' => 'from-accent to-accent-deep', 'title' => 'Bayar Setelah Konfirmasi', 'body' => 'Cek dulu akunnya di sini, baru transfer.'],
+                    ['tone' => 'from-accent-deep to-accent-deepest', 'title' => 'Dikirim Setelah Transfer', 'body' => 'Data login masuk paling lama 10 menit.'],
                 ] as $point)
                     <div class="rounded-2xl bg-surface-2 p-6 ring-1 ring-inset ring-rule">
-                        <span @class([
-                            'mb-4 flex h-11 w-11 items-center justify-center rounded-xl text-white',
-                            'bg-pop-lime' => $point['accent'] === 'pop-lime',
-                            'bg-pop-cyan' => $point['accent'] === 'pop-cyan',
-                            'bg-pop-magenta' => $point['accent'] === 'pop-magenta',
-                        ])>
+                        <span class="mb-4 flex h-11 w-11 items-center justify-center rounded-xl bg-gradient-to-br text-white {{ $point['tone'] }}">
                             <svg class="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
                                 <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75 11.25 15 15 9.75M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
                             </svg>
@@ -168,7 +170,7 @@
             <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
                 @include('public.partials.section-head', [
                     'eyebrow' => 'Etalase',
-                    'accent' => 'cyan',
+                    'accent' => 'mid',
                     'title' => 'Pilih Game',
                     'deck' => $games->count() >= 6
                         ? 'Enam game paling ramai etalasenya. Gulir ke samping untuk lihat yang lain.'
@@ -179,14 +181,15 @@
             </div>
 
             {{-- Keyboard-scrollable: the region needs a tab stop and a name before
-                 arrow keys reach it. --}}
+                 arrow keys reach it. Padding leaves the hover shadow room
+                 inside the scroll container instead of letting it clip. --}}
             <div
-                class="mt-8 overflow-x-auto overscroll-x-contain"
+                class="hide-scrollbar mt-6 overflow-x-auto overscroll-x-contain"
                 tabindex="0"
                 role="region"
                 aria-label="Daftar game, gulir ke samping"
             >
-                <div class="mx-auto flex max-w-7xl snap-x snap-mandatory gap-4 px-4 pb-2 sm:gap-5 sm:px-6 lg:px-8">
+                <div class="mx-auto flex max-w-7xl snap-x snap-mandatory gap-4 px-4 py-5 sm:gap-5 sm:px-6 lg:px-8">
                     @foreach ($games as $game)
                         @include('public.partials.game-tile', ['game' => $game])
                     @endforeach
@@ -200,7 +203,7 @@
         <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
             @include('public.partials.section-head', [
                 'eyebrow' => 'Baru masuk',
-                'accent' => 'magenta',
+                'accent' => 'accent',
                 'title' => 'Stok Terbaru',
                 'deck' => 'Akun yang baru masuk etalase, lengkap dengan harga dan statusnya.',
                 'linkLabel' => 'Lihat katalog',
@@ -210,6 +213,7 @@
             @if ($latestAccounts->isEmpty())
                 <x-empty-state
                     class="mt-8"
+                    tone="wa"
                     title="Belum ada akun"
                     description="Akun yang ditambahkan admin akan muncul di bagian ini."
                     action-label="Cek lewat WhatsApp"
@@ -226,11 +230,11 @@
     </section>
 
     {{-- ======================= HARGA TERMURAH ======================= --}}
-    <section class="pop-wash-warm border-b border-rule py-14 sm:py-16">
+    <section class="pop-wash-alt border-b border-rule py-14 sm:py-16">
         <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
             @include('public.partials.section-head', [
                 'eyebrow' => 'Paluran',
-                'accent' => 'tangerine',
+                'accent' => 'deep-mid',
                 'title' => 'Harga Termurah',
                 'deck' => 'Akun yang masih tersedia, diurutkan dari yang paling murah.',
                 'linkLabel' => 'Urutkan semua',
@@ -240,6 +244,7 @@
             @if ($availableAccounts->isEmpty())
                 <x-empty-state
                     class="mt-8"
+                    tone="wa"
                     title="Stok sedang kosong"
                     description="Belum ada akun yang tersedia. Tanya admin lewat WhatsApp untuk cek stok terbaru."
                     action-label="Tanya stok"
@@ -252,7 +257,7 @@
                             {{-- Rank chip replaces the old faint numeral: it was
                                  1.7:1 against the canvas and unreadable. --}}
                             <span
-                                class="hidden w-10 shrink-0 self-center rounded-xl bg-gradient-to-br from-accent to-pop-magenta py-1.5 text-center font-display text-sm font-bold text-white tabular-nums sm:block"
+                                class="hidden w-10 shrink-0 self-center rounded-xl bg-gradient-to-br from-accent-bright to-accent-deep py-1.5 text-center font-display text-sm font-bold text-white tabular-nums sm:block"
                                 aria-hidden="true"
                             >
                                 {{ str_pad($loop->iteration, 2, '0', STR_PAD_LEFT) }}
@@ -273,25 +278,20 @@
         <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
             @include('public.partials.section-head', [
                 'eyebrow' => 'Alur',
-                'accent' => 'lime',
+                'accent' => 'deep',
                 'title' => 'Cara Beli',
                 'deck' => 'Tiga langkah, tanpa daftar akun dan tanpa form yang panjang.',
             ])
 
             <ol class="mt-10 grid gap-6 sm:grid-cols-3 lg:gap-8">
                 @foreach ([
-                    ['title' => 'Pilih akun', 'body' => 'Cek status, harga, dan fotonya langsung di katalog.'],
-                    ['title' => 'Konfirmasi', 'body' => 'Tekan Pesan, kode akun ikut terkirim ke admin.'],
-                    ['title' => 'Transfer', 'body' => 'Data login menyusul, masuk dalam 10 menit.'],
-                ] as $index => $step)
+                    ['tone' => 'from-accent-bright to-accent', 'title' => 'Pilih akun', 'body' => 'Cek status, harga, dan fotonya langsung di katalog.'],
+                    ['tone' => 'from-accent to-accent-deep', 'title' => 'Konfirmasi', 'body' => 'Tekan Pesan, kode akun ikut terkirim ke admin.'],
+                    ['tone' => 'from-accent-deep to-accent-deepest', 'title' => 'Transfer', 'body' => 'Data login menyusul, masuk dalam 10 menit.'],
+                ] as $step)
                     <li class="relative rounded-2xl bg-surface p-6 ring-1 ring-inset ring-rule">
-                        <span @class([
-                            'flex h-12 w-12 items-center justify-center rounded-2xl font-display text-lg font-bold text-white',
-                            'bg-accent' => $index === 0,
-                            'bg-pop-cyan' => $index === 1,
-                            'bg-pop-lime' => $index === 2,
-                        ])>
-                            {{ $index + 1 }}
+                        <span class="flex h-12 w-12 items-center justify-center rounded-2xl bg-gradient-to-br font-display text-lg font-bold text-white {{ $step['tone'] }}">
+                            {{ $loop->iteration }}
                         </span>
 
                         <h3 class="mt-5 font-display text-lg font-bold tracking-tight text-ink">{{ $step['title'] }}</h3>
@@ -299,6 +299,61 @@
                     </li>
                 @endforeach
             </ol>
+        </div>
+    </section>
+
+    {{-- ======================= PERTANYAAN SINGKAT ======================= --}}
+    @php
+        $faqs = [
+            [
+                'q' => 'Apakah akunnya asli?',
+                'a' => 'Semua akun dibuat khusus untuk pembeli, bukan hasil curian. Satu akun untuk satu pembeli.',
+            ],
+            [
+                'q' => 'Kalau ternyata tidak cocok?',
+                'a' => 'Ada garansi 7 hari. Bilang saja lewat WhatsApp, diganti atau dikembalikan.',
+            ],
+            [
+                'q' => 'Berapa lama prosesnya?',
+                'a' => 'Cek etalase, konfirmasi, transfer. Data login menyusul paling lama 10 menit setelah pembayaran.',
+            ],
+        ];
+    @endphp
+
+    <section class="border-b border-rule py-14 sm:py-16">
+        <div class="mx-auto max-w-3xl px-4 sm:px-6 lg:px-8">
+            @include('public.partials.section-head', [
+                'accent' => 'mid',
+                'title' => 'Pertanyaan Singkat',
+                'deck' => 'Tiga hal yang paling sering ditanyain sebelum transfer.',
+            ])
+
+            <div class="mt-8 divide-y divide-rule border-y border-rule">
+                @foreach ($faqs as $faq)
+                    <details class="group">
+                        <summary
+                            class="flex cursor-pointer list-none items-center justify-between gap-4 py-4 text-left font-display text-base font-semibold text-ink transition-colors hover:text-accent focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent"
+                        >
+                            {{ $faq['q'] }}
+
+                            <svg
+                                class="h-5 w-5 shrink-0 text-ink-soft transition-transform group-open:rotate-45 motion-reduce:transition-none"
+                                viewBox="0 0 24 24"
+                                fill="none"
+                                stroke="currentColor"
+                                stroke-width="2"
+                                aria-hidden="true"
+                            >
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+                            </svg>
+                        </summary>
+
+                        <p class="pb-5 text-sm leading-relaxed text-pretty text-ink-soft">
+                            {{ $faq['a'] }}
+                        </p>
+                    </details>
+                @endforeach
+            </div>
         </div>
     </section>
 

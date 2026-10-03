@@ -3,7 +3,7 @@
     <head>
         <meta charset="utf-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
-        <meta name="theme-color" content="#f4f3ff" />
+        <meta name="theme-color" content="#eef6ff" />
 
         <title>@yield('title', config('app.name')) &middot; {{ config('app.name') }}</title>
         <meta

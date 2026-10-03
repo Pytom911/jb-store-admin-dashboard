@@ -3,7 +3,7 @@
     <head>
         <meta charset="utf-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
-        <meta name="theme-color" content="#ffffff" />
+        <meta name="theme-color" content="#f1f5f9" />
 
         <title>@yield('title', 'Masuk') &middot; {{ config('app.name') }}</title>
 

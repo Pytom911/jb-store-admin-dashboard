@@ -8,7 +8,7 @@
  * Every value here is picked so that white text on the solid colours clears
  * WCAG AA (4.5:1) and so that ink/ink-soft clear 4.5:1 on both paper and
  * surface. Solid fills are used instead of low-opacity tints because an
- * alpha-tinted chip washes out against the lilac canvas.
+ * alpha-tinted chip washes out against the paper canvas.
  */
 @theme {
     --font-sans: 'Instrument Sans', ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji',
@@ -91,7 +91,33 @@
     }
 
     body {
+        /*
+         * No part of the site sits on a flat field. Four translucent blue
+         * layers, capped at 10% alpha, are spread so that no scroll position
+         * falls outside all of them: two corner radials, one under the fold, and
+         * a top-down tint covering the remaining middle, so the wash reads as one
+         * continuous field rather than three separate blobs.
+         *
+         * Every layer is translucent on purpose, which leaves
+         * `background-color` authoritative. The storefront resolves to
+         * `bg-paper`, admin and guest to `bg-slate-50`, and nothing here
+         * overrides either of them.
+         *
+         * No `<html>` element in the three layouts carries a background, so this
+         * propagates to the canvas. That makes the wash span the entire viewport
+         * and stay put while content scrolls over it, which buys a fixed-looking
+         * backdrop without a fixed-position layer and without the per-frame
+         * repaint that `background-attachment: fixed` costs on mobile Safari.
+         * Adding a background to `html` would break the propagation and drop the
+         * page back to flat, so this stays on `body`.
+         */
         background-color: var(--color-paper);
+        background-image:
+            radial-gradient(72rem 44rem at 10% -6%, color-mix(in srgb, var(--color-accent) 10%, transparent), transparent 66%),
+            radial-gradient(56rem 36rem at 94% 16%, color-mix(in srgb, var(--color-accent-bright) 9%, transparent), transparent 68%),
+            radial-gradient(66rem 42rem at 46% 104%, color-mix(in srgb, var(--color-accent-deep) 8%, transparent), transparent 70%),
+            linear-gradient(to bottom, color-mix(in srgb, var(--color-accent) 5%, transparent), transparent 42%);
+        background-repeat: no-repeat;
         color: var(--color-ink);
         -webkit-tap-highlight-color: color-mix(in srgb, var(--color-accent) 18%, transparent);
     }
@@ -112,27 +138,30 @@
 }
 
 @layer components {
-    /* Long gradient strings live here instead of being repeated in every view. */
+    /* Long gradient strings live here instead of being repeated in every view.
+       Alphas sit low on purpose: the body already washes every page, so these
+       only add a local accent. At the old 16% they compounded into a visibly
+       blue page and white cards stopped reading as the brightest thing on
+       screen. */
     .pop-wash-cool {
         background-image:
-            radial-gradient(60rem 32rem at 12% -10%, color-mix(in srgb, var(--color-accent) 16%, transparent), transparent 70%),
-            radial-gradient(44rem 26rem at 92% 8%, color-mix(in srgb, var(--color-accent-deep) 14%, transparent), transparent 70%);
+            radial-gradient(60rem 32rem at 12% -10%, color-mix(in srgb, var(--color-accent) 12%, transparent), transparent 70%),
+            radial-gradient(44rem 26rem at 92% 8%, color-mix(in srgb, var(--color-accent-deep) 10%, transparent), transparent 70%);
     }
 
     /* Alternating band, so the long page still reads as a sequence of sections
        without leaving the blue identity. */
     .pop-wash-alt {
         background-image:
-            radial-gradient(48rem 28rem at 8% 0%, color-mix(in srgb, var(--color-accent-deep) 12%, transparent), transparent 70%),
-            radial-gradient(40rem 24rem at 95% 20%, color-mix(in srgb, var(--color-accent-bright) 12%, transparent), transparent 70%);
+            radial-gradient(48rem 28rem at 8% 0%, color-mix(in srgb, var(--color-accent-deep) 10%, transparent), transparent 70%),
+            radial-gradient(40rem 24rem at 95% 20%, color-mix(in srgb, var(--color-accent-bright) 9%, transparent), transparent 70%);
     }
 
-    /* Soft top-down wash so the hero is not a flat paper field. */
+    /* Accent only. The base colour and the top-down value shift are the body's
+       job now; repeating them here double-tinted the hero and put the one
+       neutral in the palette, `surface-2`, next to blue. */
     .hero-wash {
-        background-color: var(--color-paper);
-        background-image:
-            radial-gradient(120% 78% at 50% -12%, color-mix(in srgb, var(--color-accent) 11%, var(--color-paper)), transparent 72%),
-            linear-gradient(to bottom, var(--color-surface-2), var(--color-paper) 62%);
+        background-image: radial-gradient(120% 78% at 50% -12%, color-mix(in srgb, var(--color-accent) 9%, transparent), transparent 72%);
     }
 
     /* Horizontal rails hide their scrollbar: the cards are the affordance, and

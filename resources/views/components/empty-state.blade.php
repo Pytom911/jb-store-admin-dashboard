@@ -5,17 +5,27 @@
     'actionUrl' => null,
 ])
 
-<div {{ $attributes->class('rounded-xl bg-white px-6 py-14 text-center ring-1 ring-slate-200') }}>
-    <p class="text-sm font-semibold text-slate-900">{{ $title }}</p>
+<div {{ $attributes->class('rounded-2xl border border-dashed border-rule bg-surface-2 py-16 text-center') }}>
+    <span
+        class="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-accent-soft text-accent"
+        aria-hidden="true"
+    >
+        <svg class="h-7 w-7" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6">
+            <path stroke-linecap="round" stroke-linejoin="round"
+                d="M20.25 7.5l-.625 10.632a2.25 2.25 0 0 1-2.247 2.118H6.622a2.25 2.25 0 0 1-2.247-2.118L3.75 7.5m8.25 3v6.75m0 0l-3-3m3 3l3-3M3.375 7.5h17.25c.621 0 1.125-.504 1.125-1.125v-1.5c0-.621-.504-1.125-1.125-1.125H3.375c-.621 0-1.125.504-1.125 1.125v1.5c0 .621.504 1.125 1.125 1.125Z" />
+        </svg>
+    </span>
+
+    <p class="mt-5 font-display text-lg font-bold tracking-tight text-balance text-ink">{{ $title }}</p>
 
     @if ($description)
-        <p class="mt-2 text-sm text-slate-500">{{ $description }}</p>
+        <p class="mx-auto mt-2 max-w-md text-sm leading-relaxed text-pretty text-ink-soft">{{ $description }}</p>
     @endif
 
     @if ($actionUrl && $actionLabel)
         <a
             href="{{ $actionUrl }}"
-            class="mt-5 inline-flex items-center gap-2 text-sm font-semibold text-slate-900 transition hover:text-emerald-700"
+            class="mt-7 inline-flex items-center gap-2 rounded-full bg-accent px-5 py-2.5 text-sm font-semibold text-white transition-[filter] hover:brightness-110 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent"
         >
             {{ $actionLabel }}
         </a>

@@ -612,7 +612,9 @@ class AdminCrudTest extends TestCase
         $response->assertSee('hasil');
         $response->assertSee('Berikutnya');
         $response->assertSee('aria-current="page"', escape: false);
-        $response->assertSee('min-w-9');
+        // Marker from resources/views/vendor/pagination/tailwind.blade.php, so a
+        // re-publish of Laravel's stock view cannot silently replace ours.
+        $response->assertSee('min-w-10');
 
         $this->assertCount(10, $response->viewData('accounts')->items());
         $this->assertSame(25, $response->viewData('accounts')->total());

@@ -10,22 +10,34 @@
         @vite(['resources/css/app.css', 'resources/js/app.js'])
     </head>
 
-    <body class="h-full bg-slate-50 font-sans text-slate-900 antialiased">
+    <body class="theme-slate h-full bg-slate-50 font-sans text-slate-900 antialiased">
         <div class="min-h-full lg:pl-64">
             <aside class="fixed inset-y-0 left-0 z-30 hidden w-64 flex-col bg-slate-900 lg:flex">
                 @include('layouts.partials.nav')
                 @include('layouts.partials.sidebar-footer')
             </aside>
 
-            <div id="admin-drawer" class="fixed inset-0 z-50 lg:hidden">
+            {{--
+                The root spans the whole viewport, so while it is closed it must stop
+                hit testing. Without inert (and the pointer-events-none fallback)
+                here, the invisible wrapper swallows every tap on the page underneath.
+            --}}
+            <div
+                id="admin-drawer"
+                data-drawer-root
+                inert
+                class="pointer-events-none fixed inset-0 z-50 lg:hidden data-[open=true]:pointer-events-auto"
+            >
                 <div
                     data-drawer-overlay
-                    class="pointer-events-none absolute inset-0 bg-slate-900/60 opacity-0 transition-opacity duration-300"
+                    class="absolute inset-0 bg-slate-900/60 opacity-0 transition-opacity duration-300"
                 ></div>
 
                 <aside
                     data-drawer-panel
-                    class="absolute inset-y-0 left-0 flex w-72 -translate-x-full flex-col bg-slate-900 transition-transform duration-300"
+                    data-drawer-closed-class="-translate-x-full"
+                    tabindex="-1"
+                    class="absolute inset-y-0 left-0 flex w-72 -translate-x-full flex-col bg-slate-900 transition-transform duration-300 data-[open=true]:translate-x-0"
                 >
                     @include('layouts.partials.nav')
                     @include('layouts.partials.sidebar-footer')

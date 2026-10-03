@@ -4,31 +4,60 @@
 
 <a
     href="{{ route('games.show', $game) }}"
-    class="group relative flex h-full flex-col overflow-hidden rounded-xl bg-white ring-1 ring-slate-200 transition hover:ring-slate-400 focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-600"
+    class="group flex h-full flex-col overflow-hidden rounded-2xl bg-surface ring-1 ring-inset ring-rule transition-shadow hover:shadow-lg hover:shadow-accent/10 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-accent"
 >
-    <div class="flex aspect-16/10 items-center justify-center overflow-hidden bg-slate-100">
+    <div class="relative aspect-4/3 overflow-hidden bg-ink/5">
         @if ($game->image_url)
             <img
                 src="{{ $game->image_url }}"
                 alt="{{ $game->name }}"
+                width="640"
+                height="480"
                 loading="lazy"
-                class="h-full w-full object-cover transition duration-300 group-hover:scale-105"
+                decoding="async"
+                class="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105 motion-reduce:transition-none motion-reduce:group-hover:scale-100"
             />
         @else
-            <span class="text-3xl font-bold text-slate-300" aria-hidden="true">
+            <span
+                class="flex h-full w-full items-center justify-center bg-gradient-to-br from-accent-soft via-surface to-pop-cyan/10 font-display text-5xl font-bold text-accent/45"
+                aria-hidden="true"
+            >
                 {{ strtoupper(mb_substr($game->name, 0, 1)) }}
+            </span>
+        @endif
+
+        @if ($stock > 0)
+            <span class="absolute top-3 left-3 inline-flex items-center gap-1.5 rounded-full bg-pop-lime px-2.5 py-1 text-xs font-semibold text-white tabular-nums shadow-sm">
+                <span class="h-1.5 w-1.5 rounded-full bg-white" aria-hidden="true"></span>
+                {{ $stock }} tersedia
+            </span>
+        @else
+            <span class="absolute top-3 left-3 rounded-full bg-pop-slate px-2.5 py-1 text-xs font-semibold text-white shadow-sm">
+                Stok habis
             </span>
         @endif
     </div>
 
-    <div class="flex flex-1 flex-col p-4">
-        <h3 class="font-semibold text-slate-900 transition group-hover:text-emerald-700">{{ $game->name }}</h3>
+    <div class="flex flex-1 flex-col p-5">
+        <h3 class="font-display text-lg font-semibold tracking-tight text-ink transition-colors group-hover:text-accent">
+            {{ $game->name }}
+        </h3>
 
-        <p class="mt-auto pt-3 text-sm font-medium {{ $stock > 0 ? 'text-emerald-700' : 'text-slate-400' }}">
+        @if ($game->description)
+            <p class="mt-2 line-clamp-2 text-sm leading-relaxed text-ink-soft">
+                {{ $game->description }}
+            </p>
+        @endif
+
+        <p @class([
+            'mt-auto pt-5 text-sm font-semibold',
+            'text-wa' => $stock > 0,
+            'text-ink-soft' => $stock === 0,
+        ])>
             @if ($stock > 0)
-                {{ $stock }} akun tersedia
+                {{ $stock }} akun siap beli
             @else
-                Stok habis
+                Tanya admin soal stok
             @endif
         </p>
     </div>

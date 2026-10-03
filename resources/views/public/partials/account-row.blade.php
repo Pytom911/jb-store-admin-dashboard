@@ -4,21 +4,23 @@
 
 <article
     @class([
-        'relative flex items-center gap-4 px-4 py-3 transition',
-        'hover:bg-slate-50' => $account->isAvailable(),
-        'opacity-70' => ! $account->isAvailable(),
+        'relative flex gap-3 border-b border-rule py-4 transition-colors sm:gap-5',
+        'opacity-80' => ! $account->isAvailable(),
     ])
 >
     @if ($account->coverImage)
         <img
             src="{{ $account->coverImage->url }}"
             alt=""
-            class="h-14 w-24 shrink-0 rounded-lg object-cover ring-1 ring-slate-200"
+            width="256"
+            height="160"
+            class="h-14 w-16 shrink-0 rounded-lg object-cover sm:h-20 sm:w-32"
             loading="lazy"
+            decoding="async"
         />
     @else
         <span
-            class="flex h-14 w-24 shrink-0 items-center justify-center rounded-lg bg-slate-100 text-lg font-semibold text-slate-300 ring-1 ring-slate-200"
+            class="flex h-14 w-16 shrink-0 items-center justify-center rounded-lg bg-gradient-to-br from-accent-soft to-surface font-display text-xl font-bold text-accent/45 sm:h-20 sm:w-32 sm:text-2xl"
             aria-hidden="true"
         >
             {{ strtoupper(mb_substr($accountGame->name, 0, 1)) }}
@@ -26,37 +28,39 @@
     @endif
 
     <div class="min-w-0 flex-1">
-        <h3 class="truncate text-sm font-semibold text-slate-900">
-            <a href="{{ route('accounts.show', $account->account_code) }}" class="transition hover:text-emerald-700">
+        <h3 class="truncate font-semibold text-ink">
+            <a href="{{ route('accounts.show', $account->account_code) }}" class="transition-colors hover:text-accent">
                 <span class="absolute inset-0" aria-hidden="true"></span>
                 {{ $account->title }}
             </a>
         </h3>
 
-        <p class="mt-0.5 flex items-baseline gap-2 truncate text-xs text-slate-500">
+        <p class="mt-1 flex flex-wrap items-baseline gap-x-2 text-xs text-ink-soft">
             <span class="truncate">{{ $accountGame->name }}</span>
-            <span class="font-mono text-slate-400">{{ $account->account_code }}</span>
+            <span class="font-mono text-ink-soft">{{ $account->account_code }}</span>
         </p>
+
+        @unless ($account->isAvailable())
+            <p class="mt-1.5">
+                <x-status-badge :status="$account->status" />
+            </p>
+        @endunless
     </div>
 
-    <p class="shrink-0 text-base font-semibold tracking-tight tabular-nums text-slate-900">
-        {{ $account->formattedPrice() }}
-    </p>
+    <div class="flex shrink-0 flex-col items-end justify-between gap-3 sm:gap-2">
+        <p class="text-sm font-bold tracking-tight tabular-nums text-ink sm:text-xl">
+            {{ $account->formattedPrice() }}
+        </p>
 
-    <div class="shrink-0">
         @if ($account->isAvailable())
             <a
                 href="{{ $account->whatsappUrl() }}"
                 target="_blank"
                 rel="noopener noreferrer"
-                class="relative inline-flex items-center justify-center rounded-lg bg-emerald-600 px-3.5 py-2 text-sm font-semibold text-white transition hover:bg-emerald-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-600 focus-visible:ring-offset-2"
+                class="relative inline-flex items-center gap-1.5 rounded-full bg-wa px-4 py-2 text-xs font-semibold text-white transition-[filter] hover:brightness-110 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent sm:px-5 sm:py-2.5 sm:text-sm"
             >
                 Pesan
             </a>
-        @else
-            <span class="inline-flex items-center rounded-lg bg-slate-100 px-3.5 py-2 text-sm font-medium text-slate-500">
-                {{ $account->status->label() }}
-            </span>
         @endif
     </div>
 </article>

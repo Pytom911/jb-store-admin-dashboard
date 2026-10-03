@@ -1,36 +1,91 @@
-const drawerPanel = document.querySelector('[data-drawer-panel]');
-const drawerOverlay = document.querySelector('[data-drawer-overlay]');
-const drawerToggles = document.querySelectorAll('[data-drawer-toggle]');
+const drawerRoot = document.querySelector('[data-drawer-root]');
 
-if (drawerPanel && drawerToggles.length) {
-    const closedClass = drawerPanel.dataset.drawerClosedClass ?? '-translate-x-full';
-    const isOpen = () => ! drawerPanel.classList.contains(closedClass);
+if (drawerRoot) {
+    const drawerPanel = drawerRoot.querySelector('[data-drawer-panel]');
+    const drawerOverlay = drawerRoot.querySelector('[data-drawer-overlay]');
+    const drawerToggles = document.querySelectorAll('[data-drawer-toggle]');
 
-    const close = () => {
-        drawerPanel.classList.add(closedClass);
-        drawerOverlay.classList.add('opacity-0', 'pointer-events-none');
-        drawerToggles.forEach((toggle) => toggle.setAttribute('aria-expanded', 'false'));
-        document.body.classList.remove('overflow-hidden');
-    };
+    if (drawerPanel && drawerOverlay && drawerToggles.length) {
+        const closedClass = drawerPanel.dataset.drawerClosedClass ?? '-translate-x-full';
+        const isOpen = () => drawerRoot.dataset.open === 'true';
+        let trigger = null;
 
-    const open = () => {
-        drawerPanel.classList.remove(closedClass);
-        drawerOverlay.classList.remove('opacity-0', 'pointer-events-none');
-        drawerToggles.forEach((toggle) => toggle.setAttribute('aria-expanded', 'true'));
-        document.body.classList.add('overflow-hidden');
-    };
+        // The root, not just the panel, carries the open state. The root covers the
+        // whole viewport, so while it is closed it has to stop hit testing entirely
+        // (and leave the tab order), otherwise it swallows every tap on the page
+        // underneath. `inert` does both; the pointer-events swap is the fallback.
+        const close = () => {
+            drawerPanel.classList.add(closedClass);
+            drawerOverlay.classList.add('opacity-0');
+            drawerRoot.removeAttribute('data-open');
+            drawerRoot.setAttribute('inert', '');
+            drawerToggles.forEach((toggle) => toggle.setAttribute('aria-expanded', 'false'));
+            document.body.classList.remove('overflow-hidden');
+            trigger?.focus();
+            trigger = null;
+        };
 
-    drawerToggles.forEach((toggle) => toggle.addEventListener('click', () => (isOpen() ? close() : open())));
-    drawerOverlay.addEventListener('click', close);
-    drawerPanel.querySelectorAll('a').forEach((link) => link.addEventListener('click', close));
+        const open = (toggle) => {
+            trigger = toggle;
+            drawerPanel.classList.remove(closedClass);
+            drawerOverlay.classList.remove('opacity-0');
+            drawerRoot.removeAttribute('inert');
+            drawerRoot.dataset.open = 'true';
+            drawerToggles.forEach((element) =>
+                element.setAttribute('aria-expanded', element === toggle ? 'true' : 'false'),
+            );
+            document.body.classList.add('overflow-hidden');
+            drawerPanel.focus();
+        };
 
-    document.addEventListener('keydown', (event) => {
-        if (event.key === 'Escape' && isOpen()) close();
-    });
+        drawerToggles.forEach((toggle) =>
+            toggle.addEventListener('click', () => (isOpen() ? close() : open(toggle))),
+        );
+        drawerOverlay.addEventListener('click', close);
+        drawerPanel.querySelectorAll('a, button').forEach((element) =>
+            element.addEventListener('click', close),
+        );
 
-    window.matchMedia('(min-width: 64rem)').addEventListener('change', (event) => {
-        if (event.matches) close();
-    });
+        document.addEventListener('keydown', (event) => {
+            if (! isOpen()) return;
+
+            if (event.key === 'Escape') {
+                close();
+
+                return;
+            }
+
+            if (event.key !== 'Tab') return;
+
+            // The drawer covers the viewport, so Tab has to cycle inside the panel.
+            // Without this the next stop is a link buried under the overlay.
+            const focusable = Array.from(
+                drawerPanel.querySelectorAll(
+                    'a[href], button:not([disabled]), input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])',
+                ),
+            ).filter((element) => element.offsetParent !== null);
+
+            if (! focusable.length) return;
+
+            const first = focusable[0];
+            const last = focusable.at(-1);
+            const active = document.activeElement;
+
+            if (event.shiftKey && (active === first || active === drawerPanel)) {
+                event.preventDefault();
+                last.focus();
+            } else if (! event.shiftKey && (active === last || active === drawerPanel)) {
+                event.preventDefault();
+                first.focus();
+            }
+        });
+
+        window.matchMedia('(min-width: 64rem)').addEventListener('change', (event) => {
+            if (event.matches && isOpen()) close();
+        });
+
+        if (isOpen()) close();
+    }
 }
 
 const confirmModal = document.querySelector('[data-confirm-modal]');
@@ -99,4 +154,17 @@ document.querySelectorAll('[data-flash]').forEach((flash) => {
         flash.classList.add('opacity-0', 'transition-opacity', 'duration-500');
         setTimeout(() => flash.remove(), 500);
     }, 5000);
+});
+
+document.addEventListener('click', (event) => {
+    const dismiss = event.target.closest('[data-alert-dismiss]');
+
+    if (!dismiss) return;
+
+    // Focus has to land somewhere deliberate, otherwise removing the notice
+    // drops a keyboard user back at the top of the document.
+    const notice = dismiss.closest('[role="status"], [role="alert"]');
+    notice?.remove();
+
+    document.querySelector('main')?.focus();
 });

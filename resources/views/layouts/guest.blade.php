@@ -3,6 +3,7 @@
     <head>
         <meta charset="utf-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <meta name="theme-color" content="#ffffff" />
 
         <title>@yield('title', 'Masuk') &middot; {{ config('app.name') }}</title>
 
@@ -10,7 +11,7 @@
         @vite(['resources/css/app.css', 'resources/js/app.js'])
     </head>
 
-    <body class="flex h-full items-center justify-center bg-slate-50 px-4 py-12 font-sans text-slate-900 antialiased">
+    <body class="theme-slate flex h-full items-center justify-center bg-slate-50 px-4 py-12 font-sans text-slate-900 antialiased">
         <main class="w-full max-w-sm">
             <div class="mb-8 text-center">
                 <span

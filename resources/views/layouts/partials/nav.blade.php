@@ -44,6 +44,18 @@
             <p class="truncate text-sm font-semibold text-white">{{ config('app.name') }}</p>
             <p class="truncate text-xs text-slate-400">Panel Admin</p>
         </div>
+
+        {{-- Only ever reachable inside the mobile drawer: the desktop aside is lg:flex, so this stays hidden there. --}}
+        <button
+            data-drawer-toggle
+            type="button"
+            aria-label="Tutup menu navigasi"
+            class="ml-auto -mr-1 rounded-lg p-2 text-slate-400 transition hover:bg-slate-800 hover:text-white lg:hidden"
+        >
+            <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12" />
+            </svg>
+        </button>
     </div>
 
     @foreach ($groups as $group)

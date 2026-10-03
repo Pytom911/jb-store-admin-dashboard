@@ -2,7 +2,124 @@
 
 @source '../../storage/framework/views/*.php';
 
+/*
+ * Bright Pop palette.
+ *
+ * Every value here is picked so that white text on the solid colours clears
+ * WCAG AA (4.5:1) and so that ink/ink-soft clear 4.5:1 on both paper and
+ * surface. Solid fills are used instead of low-opacity tints because an
+ * alpha-tinted chip washes out against the lilac canvas.
+ */
 @theme {
     --font-sans: 'Instrument Sans', ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji',
         'Segoe UI Symbol', 'Noto Color Emoji';
+    --font-display: 'Archivo', 'Instrument Sans', ui-sans-serif, system-ui, sans-serif;
+
+    --color-paper: #f4f3ff;
+    --color-surface: #ffffff;
+    --color-surface-2: #fbfaff;
+    --color-ink: #141326;
+    --color-ink-soft: #55536e;
+    --color-rule: #e3e0f7;
+    --color-accent: #5b2ae0;
+    --color-accent-soft: #ede9fe;
+    --color-wa: #0a7a3e;
+
+    /* Section accents. Each holds white text at 5:1 or better. */
+    --color-pop-cyan: #0e7490;
+    --color-pop-lime: #4d7c0f;
+    --color-pop-magenta: #be185d;
+    --color-pop-tangerine: #c2410c;
+    --color-pop-slate: #64748b;
+
+    /*
+     * Semantic tokens. Shared components (form fields, buttons, pagination) read
+     * only these rather than the palette above, so a single class on <body>
+     * re-themes every one of them: the storefront resolves to Bright Pop, the
+     * admin panel and the login screen fall back to the slate/indigo scheme
+     * they already use via .theme-slate below.
+     */
+    --color-fg: #141326;
+    --color-fg-soft: #55536e;
+    --color-line: #e3e0f7;
+    --color-brand: #5b2ae0;
+    --color-brand-soft: #ede9fe;
+    --color-danger: #dc2626;
+    --color-field: #ffffff;
+    --color-field-line: #cdc9ea;
+    --color-field-placeholder: #6b6890;
+}
+
+@layer base {
+    .theme-slate {
+        --color-fg: #0f172a;
+        --color-fg-soft: #475569;
+        --color-line: #cbd5e1;
+        --color-brand: #4f46e5;
+        --color-brand-soft: #eef2ff;
+        --color-danger: #dc2626;
+        --color-field: #ffffff;
+        --color-field-line: #cbd5e1;
+        --color-field-placeholder: #64748b;
+    }
+
+    html {
+        color-scheme: light;
+        scroll-padding-top: 7.5rem;
+    }
+
+    @media (prefers-reduced-motion: no-preference) {
+        html {
+            scroll-behavior: smooth;
+        }
+    }
+
+    body {
+        background-color: var(--color-paper);
+        color: var(--color-ink);
+        -webkit-tap-highlight-color: color-mix(in srgb, var(--color-accent) 18%, transparent);
+    }
+
+    /* Native controls pick up the field tokens so Windows dark mode cannot
+       render an unstyled white-on-white select. */
+    input,
+    select,
+    textarea {
+        background-color: var(--color-field);
+        color: var(--color-fg);
+    }
+
+    ::selection {
+        background-color: var(--color-accent);
+        color: var(--color-surface);
+    }
+}
+
+@layer components {
+    /* Long gradient strings live here instead of being repeated in every view. */
+    .pop-wash-cool {
+        background-image:
+            radial-gradient(60rem 32rem at 12% -10%, color-mix(in srgb, var(--color-accent) 16%, transparent), transparent 70%),
+            radial-gradient(44rem 26rem at 92% 8%, color-mix(in srgb, var(--color-pop-cyan) 14%, transparent), transparent 70%);
+    }
+
+    .pop-wash-warm {
+        background-image:
+            radial-gradient(48rem 28rem at 8% 0%, color-mix(in srgb, var(--color-pop-magenta) 12%, transparent), transparent 70%),
+            radial-gradient(40rem 24rem at 95% 20%, color-mix(in srgb, var(--color-pop-tangerine) 12%, transparent), transparent 70%);
+    }
+
+    .pop-wash-lime {
+        background-image: radial-gradient(52rem 26rem at 50% -20%, color-mix(in srgb, var(--color-pop-lime) 14%, transparent), transparent 70%);
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    *,
+    ::before,
+    ::after {
+        transition-duration: 0.01ms !important;
+        animation-duration: 0.01ms !important;
+        scroll-behavior: auto !important;
+    }
 }

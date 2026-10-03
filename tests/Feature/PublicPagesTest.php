@@ -5,6 +5,7 @@ namespace Tests\Feature;
 use App\Enums\AccountStatus;
 use App\Models\Account;
 use App\Models\Game;
+use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
@@ -206,6 +207,22 @@ class PublicPagesTest extends TestCase
         $this->get(route('games.index'))->assertOk()->assertSee('aria-current="page"', false);
     }
 
+    public function test_a_closed_drawer_never_intercepts_taps_on_small_screens(): void
+    {
+        // The drawer root covers the whole viewport, so while it is closed it has to
+        // stop hit testing and drop out of the tab order. Without inert plus the
+        // pointer-events swap, the invisible wrapper swallows every tap underneath.
+        $closedRoot = 'data-drawer-root inert class="pointer-events-none fixed inset-0 z-50 lg:hidden data-[open=true]:pointer-events-auto"';
+
+        $this->actingAs(User::factory()->create(['role' => User::ROLE_ADMIN]));
+
+        foreach (['/', '/games', '/accounts', '/admin'] as $uri) {
+            $html = preg_replace('/\s+/', ' ', $this->get($uri)->assertOk()->getContent());
+
+            $this->assertStringContainsString($closedRoot, $html, "The closed drawer on {$uri} still covers the page.");
+        }
+    }
+
     public function test_game_covers_render_when_an_image_is_uploaded(): void
     {
         Storage::fake('public');
@@ -225,5 +242,112 @@ class PublicPagesTest extends TestCase
         Game::factory()->create(['name' => 'Zenless Zone Zero']);
 
         $this->get('/games')->assertOk()->assertSee('Z');
+    }
+
+    public function test_the_home_hero_falls_back_when_no_game_has_a_cover(): void
+    {
+        Game::factory()->count(3)->create();
+
+        // No factory game carries a cover, so the collage collapses to the
+        // gradient panel. A hole in the grid is worse than no collage at all.
+        $this->get('/')
+            ->assertOk()
+            ->assertSee('Cover game belum diunggah')
+            ->assertDontSee('<img', escape: false);
+    }
+
+    public function test_the_home_hero_collapses_gracefully_for_a_partial_set_of_covers(): void
+    {
+        Storage::fake('public');
+
+        $withCover = Game::factory()->create(['name' => 'Punya Sampul']);
+        Game::factory()->create(['name' => 'Tanpa Sampul']);
+        $withCover->update(['image' => UploadedFile::fake()->create('cover.jpg', 64, 'image/jpeg')->store('games', 'public')]);
+
+        $this->get('/')
+            ->assertOk()
+            ->assertSee($withCover->refresh()->image_url, false)
+            ->assertDontSee('Cover game belum diunggah');
+    }
+
+    public function test_a_low_stock_warning_appears_on_the_homepage(): void
+    {
+        $game = Game::factory()->create();
+        Account::factory()->count(2)->for($game)->create();
+
+        $this->get('/')
+            ->assertOk()
+            ->assertSee('Stok tinggal 2 akun')
+            ->assertSee('role="status"', escape: false);
+    }
+
+    public function test_the_homepage_shows_no_stock_warning_when_stock_is_healthy(): void
+    {
+        $game = Game::factory()->create();
+        Account::factory()->count(6)->for($game)->create();
+
+        $this->get('/')->assertOk()->assertDontSee('Stok tinggal');
+    }
+
+    public function test_the_reserved_filter_explains_why_an_account_is_on_hold(): void
+    {
+        $game = Game::factory()->create();
+        Account::factory()->for($game)->reserved()->create();
+
+        $this->get("/games/{$game->slug}?status=".AccountStatus::Reserved->value)
+            ->assertOk()
+            ->assertSee('Status sedang dipesan');
+    }
+
+    public function test_each_status_gets_its_own_badge_colour(): void
+    {
+        $game = Game::factory()->create();
+        Account::factory()->for($game)->create();
+        Account::factory()->for($game)->sold()->create();
+        Account::factory()->for($game)->reserved()->create();
+
+        $html = $this->get('/accounts?status=sold')->assertOk()->getContent();
+
+        $this->assertStringContainsString('bg-pop-slate', $html);
+        $this->assertStringNotContainsString('bg-pop-tangerine', $html);
+
+        $html = $this->get('/accounts?status=reserved')->assertOk()->getContent();
+
+        $this->assertStringContainsString('bg-pop-tangerine', $html);
+    }
+
+    public function test_an_unavailable_account_card_offers_an_alternative_instead_of_a_dead_button(): void
+    {
+        $game = Game::factory()->create();
+        $account = Account::factory()->for($game)->sold()->create();
+
+        $this->get('/accounts?status=sold')
+            ->assertOk()
+            ->assertSee('cari akun lain')
+            ->assertDontSee($account->whatsappUrl(), false);
+    }
+
+    public function test_the_login_screen_keeps_the_slate_theme_inside_the_new_token_system(): void
+    {
+        // The storefront resolves the shared components against Bright Pop;
+        // login and admin opt back into slate. This guards the opt-out class,
+        // because losing it would repaint the admin panel violet.
+        $this->get('/login')
+            ->assertOk()
+            ->assertSee('theme-slate', escape: false);
+
+        $this->actingAs(User::factory()->create(['role' => User::ROLE_ADMIN]));
+
+        $this->get('/admin')
+            ->assertOk()
+            ->assertSee('theme-slate', escape: false);
+    }
+
+    public function test_public_pages_expose_an_image_free_fallback_for_missing_covers(): void
+    {
+        $game = Game::factory()->create(['name' => 'Ash Echoes']);
+
+        $this->get('/games')->assertOk()->assertSee('Ash Echoes');
+        $this->get("/games/{$game->slug}")->assertOk()->assertSee('Ash Echoes');
     }
 }

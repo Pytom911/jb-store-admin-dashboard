@@ -237,23 +237,30 @@
                 'deck' => 'Tiga hal yang paling sering ditanyain sebelum transfer.',
             ])
 
-            <div class="mt-8 divide-y divide-rule border-y border-rule">
+            <div class="mt-8 space-y-3">
                 @foreach ($faqs as $faq)
-                    <details class="group">
+                    <details class="group overflow-hidden rounded-xl border border-rule bg-paper/50">
                         <summary
-                            class="flex cursor-pointer list-none items-center justify-between gap-4 py-4 text-left font-display text-base font-semibold text-ink transition-colors hover:text-accent focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent">
-                            {{ $faq['q'] }}
+                            class="flex cursor-pointer list-none items-center justify-between gap-4 p-5 text-left font-display text-base font-semibold text-ink transition-colors hover:text-accent focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent">
+                            <span class="inline-flex items-center gap-3">
+                                <svg class="h-5 w-5 shrink-0 text-accent-bright" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M9.879 7.519c1.171-1.025 3.071-1.025 4.242 0 1.172 1.025 1.172 2.687 0 3.712-.203.179-.43.326-.67.442-.745.361-1.45.999-1.45 1.827v.75M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Zm-9 5.25h.008v.008H12v-.008Z" />
+                                </svg>
+                                {{ $faq['q'] }}
+                            </span>
 
-                            <svg class="h-5 w-5 shrink-0 text-ink-soft transition-transform group-open:rotate-45 motion-reduce:transition-none"
+                            <svg class="h-5 w-5 shrink-0 text-ink-soft transition-transform group-open:rotate-45 group-open:text-accent motion-reduce:transition-none"
                                 viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
                                 aria-hidden="true">
                                 <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
                             </svg>
                         </summary>
 
-                        <p class="pb-5 text-sm leading-relaxed text-pretty text-ink-soft">
-                            {{ $faq['a'] }}
-                        </p>
+                        <div class="border-t border-rule px-5 pb-5">
+                            <p class="mt-4 text-base leading-relaxed text-pretty text-ink-soft">
+                                {{ $faq['a'] }}
+                            </p>
+                        </div>
                     </details>
                 @endforeach
             </div>
